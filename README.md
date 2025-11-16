@@ -1,22 +1,91 @@
-# Infinite Yield
+# badinfiniteyield
 
-<a href="https://discord.gg/78ZuWSq"><img src="https://files.catbox.moe/klbeou.png" alt="discord" width="48"></a> The best command line script for roblox.
+A powerful command-line script for Roblox with 400+ commands and extensive developer tools.
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/froumes/badinfiniteyield/refs/heads/master/source"))()
 ```
 
- - Currently 400 commands
- - Open Source
- - 7+ years of development
+## Features
 
-## Developers
+- **400+ Commands** - Comprehensive command set for Roblox exploitation
+- **Developer Tools** - 30+ specialized commands for reverse engineering and exploit development
+- **Modern UI** - Clean, developer-focused interface
+- **Auto-Load on Teleport** - Use `keepiy` to automatically load on server teleports
+- **Plugin System** - Extensible plugin architecture
+- **Anti-Cheat Protection** - Randomized asset IDs to avoid detection
 
-### Creator: [Edge](https://github.com/EdgeIY)
-### Developers: [Moon](https://github.com/LorekeeperZinnia), [Zwolf](https://github.com/luatsuki), [Hunter](https://github.com/tooslzy), [Toon](https://github.com/Toon-arch), [Peyton](https://github.com/peyton2465), [ATP](https://github.com/ionizedparticle)
+## Quick Start
 
-## Usage
-You can learn how to use all the features of this script in [the wiki](https://github.com/EdgeIY/infiniteyield/wiki)!
+1. Copy the loadstring above
+2. Paste it into your Roblox executor
+3. Press your prefix key (default: `;`) to open the command bar
+4. Type `help` to see all available commands
 
-## Contributing
-There is no specific rules on contributing (as of now) just open a [pull request](https://github.com/EdgeIY/infiniteyield/pulls) and if it checks out we will merge it!
+## New Features
+
+### Developer Commands (30+ new commands)
+
+**Search & Find:**
+- `findguitext / fgt [text]` - Find GUI elements containing text
+- `findremotes / fr` - Find all RemoteEvents and RemoteFunctions
+- `findbindables / fb` - Find all BindableEvents and BindableFunctions
+- `findscript / fs [name]` - Find scripts by name or content
+- `findmodules / fm [name]` - Find ModuleScripts
+- `findbyclass / fbc [class]` - Find all instances of a class
+- `findbytag / fbt [tag]` - Find instances with CollectionService tags
+- And many more...
+
+**Inspection:**
+- `getproperties / gp [object]` - Get all properties of an object
+- `getchildren / gc [path]` - Get direct children
+- `getdescendants / gd [path]` - Get all descendants
+- `gethierarchy / gh [path]` - Get full object hierarchy
+- `getremoteinfo / gri [name]` - Get remote connection info
+
+**Information:**
+- `workspaceinfo / wsi` - Workspace statistics and breakdown
+- `getservices / gs` - List all Roblox services
+- `getnetworkowner / gno [part]` - Network ownership info
+
+### Utility Commands
+
+- `productfaker / pfaker` - Fake developer product purchases
+- `bsh` - Load BSH (LuaArmor loader)
+- `umr` - Load Universal Movement Recorder
+- `settings / set / config` - Open settings window
+- `debug [on/off]` - Toggle debug mode
+
+### Remote Spy
+
+- `remotespy / rspy` - Opens Cobalt Remote Spy (new)
+- `oldrspy` - Opens Simple Spy V3 (legacy)
+
+## Key Commands
+
+- `help` - Show all commands
+- `cmds` - List all commands
+- `keepiy` - Auto-load on teleport
+- `settings` - Open settings
+- `discord` - Get Discord invite link
+
+## Discord
+
+Join our Discord server for support and updates:
+**https://discord.gg/Jcw7U2YeC3**
+
+## Credits
+
+Original Team + austin
+
+## License
+
+This project is open source and available for modification.
+
+## Repository
+
+**GitHub:** https://github.com/froumes/badinfiniteyield
+
+## Changelog
+
+See [CHANGELOG_PLAIN.txt](CHANGELOG_PLAIN.txt) for a complete list of changes and new commands.
