@@ -4641,6 +4641,9 @@ CMDs[#CMDs + 1] = {NAME = 'debug [on/off]', DESC = 'Enables or disables debug mo
 CMDs[#CMDs + 1] = {NAME = 'productfaker / pfaker', DESC = 'Opens a GUI to fake developer product purchases'}
 CMDs[#CMDs + 1] = {NAME = 'bsh', DESC = 'Loads BSH (LuaArmor loader)'}
 CMDs[#CMDs + 1] = {NAME = 'umr', DESC = 'Loads Universal Movement Recorder'}
+CMDs[#CMDs + 1] = {NAME = 'ketamine', DESC = 'Loads Ketamine script'}
+CMDs[#CMDs + 1] = {NAME = 'desync [x] [y] [z]', DESC = 'Desyncs your character (hook-based, client-side only). Usage: desync [x] [y] [z] - x, y, z are offset values'}
+CMDs[#CMDs + 1] = {NAME = 'undesync', DESC = 'Restores character sync (normal movement)'}
 CMDs[#CMDs + 1] = {NAME = 'findguitext / fgt [text]', DESC = 'Finds all GUI elements containing the specified text'}
 CMDs[#CMDs + 1] = {NAME = 'findvalue / fv [value]', DESC = 'Finds instances with a property matching the specified value'}
 CMDs[#CMDs + 1] = {NAME = 'findguid / guid [name]', DESC = 'Finds GUIDs of objects in workspace by name (cycles through all)'}
@@ -8938,6 +8941,175 @@ end)
 
 addcmd("umr", {}, function(args, speaker)
     loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/3fbbd860bc303deb61b2003362903159.lua"))()
+end)
+
+addcmd("ketamine", {}, function(args, speaker)
+    notify("Loading", "Hold on a sec")
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScripts/Ketamine/refs/heads/main/Ketamine.lua"))()
+end)
+
+-- Hook-based clientside desync
+local desyncT = {enabled = false, loc = CFrame.new()}
+local desyncCustomOffset = {x = 0, y = 0, z = 0}
+local desyncUseCustom = false
+local desyncHook = nil
+local desyncConnection = nil
+local prevLookVector = nil
+local isSpinning = false
+local spinThreshold = 15
+
+local function getDesyncOffset()
+    if desyncUseCustom then
+        return CFrame.new(desyncCustomOffset.x, desyncCustomOffset.y, desyncCustomOffset.z)
+    else
+        local ping = Players.LocalPlayer:GetNetworkPing() * 1000
+        if ping < 100 then 
+            return CFrame.new(0, 0, -2)
+        elseif ping <= 170 then 
+            return CFrame.new(0, 0, -2.7)
+        else 
+            return CFrame.new(0, 0, -3.7) 
+        end
+    end
+end
+
+addcmd("desync", {}, function(args, speaker)
+    if not hookmetamethod then
+        notify("Desync", "Your exploit doesn't support hookmetamethod")
+        return
+    end
+    
+    local char = speaker.Character
+    if not char then
+        notify("Desync", "Character not found")
+        return
+    end
+    
+    local rootPart = getRoot(char)
+    if not rootPart then
+        notify("Desync", "HumanoidRootPart not found")
+        return
+    end
+    
+    -- Parse custom offset parameters (optional: x y z)
+    if args[1] and args[2] and args[3] then
+        local x = tonumber(args[1])
+        local y = tonumber(args[2])
+        local z = tonumber(args[3])
+        if x and y and z then
+            desyncCustomOffset.x = x
+            desyncCustomOffset.y = y
+            desyncCustomOffset.z = z
+            desyncUseCustom = true
+            notify("Desync", string.format("Using custom offset: %.2f, %.2f, %.2f", x, y, z))
+        else
+            notify("Desync", "Invalid offset values. Usage: desync [x] [y] [z]")
+            return
+        end
+    else
+        desyncUseCustom = false
+    end
+    
+    -- Stop previous desync if exists
+    if desyncConnection then
+        desyncConnection:Disconnect()
+        desyncConnection = nil
+    end
+    
+    -- Enable desync
+    desyncT.enabled = true
+    prevLookVector = nil
+    isSpinning = false
+    
+    -- Hook to intercept CFrame reads from other scripts (only create once)
+    if not desyncHook then
+        desyncHook = hookmetamethod(game, "__index", newcclosure(function(self, key)
+            if desyncT.enabled and not checkcaller() and 
+               key == "CFrame" and 
+               Players.LocalPlayer.Character and 
+               self == Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and
+               not isSpinning then
+                return desyncT.loc
+            end
+            return desyncHook(self, key)
+        end))
+    end
+    
+    -- Heartbeat loop to move character forward then back
+    desyncConnection = RunService.Heartbeat:Connect(function()
+        if not desyncT.enabled or not Players.LocalPlayer.Character then 
+            return 
+        end
+        
+        local character = Players.LocalPlayer.Character
+        local root = character:FindFirstChild("HumanoidRootPart")
+        if not root then return end
+        
+        -- Detect spinning to auto-pause (anti-detection)
+        local currentLook = root.CFrame.LookVector
+        if prevLookVector then
+            local dot = math.clamp(prevLookVector:Dot(currentLook), -1, 1)
+            local angleDiff = math.deg(math.acos(dot))
+            isSpinning = angleDiff > spinThreshold
+        end
+        prevLookVector = currentLook
+        
+        -- Pause desync when spinning
+        if isSpinning then return end
+        
+        -- Store real position
+        desyncT.loc = root.CFrame
+        
+        -- Move forward by offset
+        local offset = getDesyncOffset()
+        local newCFrame = desyncT.loc * offset
+        root.CFrame = newCFrame
+        
+        -- Wait for RenderStepped then restore
+        RunService.RenderStepped:Wait()
+        root.CFrame = desyncT.loc
+    end)
+    
+    notify("Desync", "Character desynced (hook-based, client-side only)")
+end)
+
+addcmd("undesync", {}, function(args, speaker)
+    local char = speaker.Character
+    if not char then
+        notify("Undesync", "Character not found")
+        return
+    end
+    
+    local rootPart = getRoot(char)
+    if not rootPart then
+        notify("Undesync", "HumanoidRootPart not found")
+        return
+    end
+    
+    -- Stop desync
+    desyncT.enabled = false
+    
+    -- Restore character to real position if desynced
+    if desyncT.loc and desyncT.loc ~= CFrame.new() then
+        rootPart.CFrame = desyncT.loc
+    end
+    
+    -- Disconnect the heartbeat connection
+    if desyncConnection then
+        desyncConnection:Disconnect()
+        desyncConnection = nil
+    end
+    
+    -- Reset all state variables
+    prevLookVector = nil
+    isSpinning = false
+    desyncUseCustom = false
+    desyncT.loc = CFrame.new()
+    
+    -- Note: We don't restore the hook because it checks desyncT.enabled first
+    -- Setting enabled to false effectively disables it
+    
+    notify("Undesync", "Character synced")
 end)
 
 -- Developer Commands
