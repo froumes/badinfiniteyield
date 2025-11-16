@@ -103,21 +103,25 @@ isLegacyChat = TextChatService.ChatVersion == Enum.ChatVersion.LegacyChatService
 
 -- xylex & europa
 local iyassets = {
-    ["infiniteyield/assets/bindsandplugins.png"] = "rbxassetid://5147695474",
-    ["infiniteyield/assets/close.png"] = "rbxassetid://5054663650",
-    ["infiniteyield/assets/editaliases.png"] = "rbxassetid://5147488658",
-    ["infiniteyield/assets/editkeybinds.png"] = "rbxassetid://129697930",
-    ["infiniteyield/assets/edittheme.png"] = "rbxassetid://4911962991",
-    ["infiniteyield/assets/editwaypoints.png"] = "rbxassetid://5147488592",
-    ["infiniteyield/assets/imgstudiopluginlogo.png"] = "rbxassetid://4113050383",
-    ["infiniteyield/assets/logo.png"] = "rbxassetid://1352543873",
-    ["infiniteyield/assets/minimize.png"] = "rbxassetid://2406617031",
-    ["infiniteyield/assets/pin.png"] = "rbxassetid://6234691350",
-    ["infiniteyield/assets/reference.png"] = "rbxassetid://3523243755",
-    ["infiniteyield/assets/settings.png"] = "rbxassetid://1204397029"
+    ["infiniteyield/assets/bindsandplugins.png"] = "rbxassetid://" .. tostring(math.random(1000000, 999999999)),
+    ["infiniteyield/assets/close.png"] = "rbxassetid://" .. tostring(math.random(1000000, 999999999)),
+    ["infiniteyield/assets/editaliases.png"] = "rbxassetid://" .. tostring(math.random(1000000, 999999999)),
+    ["infiniteyield/assets/editkeybinds.png"] = "rbxassetid://" .. tostring(math.random(1000000, 999999999)),
+    ["infiniteyield/assets/edittheme.png"] = "rbxassetid://" .. tostring(math.random(1000000, 999999999)),
+    ["infiniteyield/assets/editwaypoints.png"] = "rbxassetid://" .. tostring(math.random(1000000, 999999999)),
+    ["infiniteyield/assets/imgstudiopluginlogo.png"] = "rbxassetid://" .. tostring(math.random(1000000, 999999999)),
+    ["infiniteyield/assets/logo.png"] = "rbxassetid://" .. tostring(math.random(100000000, 999999999999)),
+    ["infiniteyield/assets/minimize.png"] = "rbxassetid://" .. tostring(math.random(1000000, 999999999)),
+    ["infiniteyield/assets/pin.png"] = "rbxassetid://" .. tostring(math.random(1000000, 999999999)),
+    ["infiniteyield/assets/reference.png"] = "rbxassetid://" .. tostring(math.random(1000000, 999999999)),
+    ["infiniteyield/assets/settings.png"] = "rbxassetid://" .. tostring(math.random(1000000, 999999999))
 }
 
 local function getcustomasset(asset)
+    -- Force logo.png to use asset ID, not local file
+    if asset == "infiniteyield/assets/logo.png" then
+        return iyassets[asset]
+    end
     if waxgetcustomasset then
         local success, result = pcall(function()
             return waxgetcustomasset(asset)
@@ -138,8 +142,11 @@ if makefolder and isfolder and writefile and isfile then
             end
         end
         for path in iyassets do
-            if not isfile(path) then
-                writefile(path, game:HttpGet((path:gsub("infiniteyield/", assets))))
+            -- Skip logo.png - we want to use the asset ID directly, not download from backup
+            if path ~= "infiniteyield/assets/logo.png" then
+                if not isfile(path) then
+                    writefile(path, game:HttpGet((path:gsub("infiniteyield/", assets))))
+                end
             end
         end
         if IsOnMobile then writefile("infiniteyield/assets/.nomedia") end
@@ -320,133 +327,175 @@ text1 = {}
 text2 = {}
 scroll = {}
 
+-- Modern Color Palette (Developer Theme)
+local colors = {
+	bgPrimary = Color3.fromRGB(18, 18, 20),
+	bgSecondary = Color3.fromRGB(25, 25, 28),
+	bgTertiary = Color3.fromRGB(32, 32, 36),
+	border = Color3.fromRGB(50, 50, 55),
+	textPrimary = Color3.fromRGB(240, 240, 245),
+	textSecondary = Color3.fromRGB(180, 180, 190),
+	textMuted = Color3.fromRGB(120, 120, 130),
+	accentBlue = Color3.fromRGB(100, 150, 255),
+	scrollbar = Color3.fromRGB(60, 60, 70),
+}
+
 ScaledHolder.Name = randomString()
 ScaledHolder.Size = UDim2.fromScale(1, 1)
 ScaledHolder.BackgroundTransparency = 1
 ScaledHolder.Parent = PARENT
 Scale.Name = randomString()
+Scale.Parent = ScaledHolder
 
+-- Title Bar - Always visible at bottom right
+Title = Instance.new("Frame")
+Title.Name = "badinfiniteyield"
+Title.Parent = ScaledHolder
+Title.Active = true
+Title.BackgroundColor3 = colors.bgSecondary
+Title.BorderSizePixel = 1
+Title.BorderColor3 = colors.border
+Title.Position = UDim2.new(1, -320, 1, -32)
+Title.Size = UDim2.new(0, 320, 0, 32)
+Title.Visible = true -- Ensure it's visible
+Title.ZIndex = 20
+table.insert(shade2,Title)
+
+local titleBarCorner = Instance.new("UICorner")
+titleBarCorner.CornerRadius = UDim.new(0, 8)
+titleBarCorner.Parent = Title
+
+local titleText = Instance.new("TextLabel")
+titleText.Name = "TitleText"
+titleText.Parent = Title
+titleText.BackgroundTransparency = 1
+titleText.Size = UDim2.new(1, -40, 1, 0)
+titleText.Position = UDim2.new(0, 12, 0, 0)
+titleText.Font = Enum.Font.RobotoMono
+titleText.TextSize = 14
+titleText.Text = "badinfiniteyield"
+titleText.TextColor3 = colors.textPrimary
+titleText.TextXAlignment = Enum.TextXAlignment.Left
+titleText.ZIndex = 21
+table.insert(text1,titleText)
+
+-- Main Holder (Command Window) - Pulls up from bottom right
 Holder.Name = randomString()
 Holder.Parent = ScaledHolder
 Holder.Active = true
-Holder.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
-Holder.BorderSizePixel = 0
-Holder.Position = UDim2.new(1, -250, 1, -220)
-Holder.Size = UDim2.new(0, 250, 0, 220)
+Holder.BackgroundColor3 = colors.bgPrimary
+Holder.BorderSizePixel = 1
+Holder.BorderColor3 = colors.border
+Holder.Position = UDim2.new(1, -320, 1, -32)
+Holder.Size = UDim2.new(0, 320, 0, 300)
 Holder.ZIndex = 10
 table.insert(shade2,Holder)
 
-Title.Name = "Title"
-Title.Parent = Holder
-Title.Active = true
-Title.BackgroundColor3 = Color3.fromRGB(36,36,37)
-Title.BorderSizePixel = 0
-Title.Size = UDim2.new(0, 250, 0, 20)
-Title.Font = Enum.Font.SourceSans
-Title.TextSize = 18
-Title.Text = "Infinite Yield FE v" .. currentVersion
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = Holder
 
-do
-	local emoji = ({
-		["01 01"] = "🎆",
-		[(function(Year)
-			local A = math.floor(Year/100)
-			local B = math.floor((13+8*A)/25)
-			local C = (15-B+A-math.floor(A/4))%30
-			local D = (4+A-math.floor(A/4))%7
-			local E = (19*(Year%19)+C)%30
-			local F = (2*(Year%4)+4*(Year%7)+6*E+D)%7
-			local G = (22+E+F)
-			if E == 29 and F == 6 then
-				return "04 19"
-			elseif E == 28 and F == 6 then
-				return "04 18"
-			elseif 31 < G then
-				return ("04 %02d"):format(G-31)
-			end
-			return ("03 %02d"):format(G)
-		end)(tonumber(os.date"%Y"))] = "🥚",
-		["10 31"] = "🎃",
-		["12 25"] = "🎄"
-	})[os.date("%m %d")]
-	if emoji then
-		Title.Text = ("%s %s %s"):format(emoji, Title.Text, emoji)
-	end
-end
+-- Command Bar Container
+local cmdbarContainer = Instance.new("Frame")
+cmdbarContainer.Name = "CmdbarContainer"
+cmdbarContainer.Parent = Holder
+cmdbarContainer.BackgroundColor3 = colors.bgSecondary
+cmdbarContainer.BorderSizePixel = 1
+cmdbarContainer.BorderColor3 = colors.border
+cmdbarContainer.Position = UDim2.new(0, 8, 0, 8)
+cmdbarContainer.Size = UDim2.new(1, -16, 0, 36)
+cmdbarContainer.ZIndex = 10
 
-Title.TextColor3 = Color3.new(1, 1, 1)
-Title.ZIndex = 10
-table.insert(shade1,Title)
-table.insert(text1,Title)
+local cmdbarCorner = Instance.new("UICorner")
+cmdbarCorner.CornerRadius = UDim.new(0, 6)
+cmdbarCorner.Parent = cmdbarContainer
 
-Dark.Name = "Dark"
-Dark.Parent = Holder
-Dark.Active = true
-Dark.BackgroundColor3 = Color3.fromRGB(36, 36, 37)
-Dark.BorderSizePixel = 0
-Dark.Position = UDim2.new(0, 0, 0, 45)
-Dark.Size = UDim2.new(0, 250, 0, 175)
-Dark.ZIndex = 10
-table.insert(shade1,Dark)
+local prefixLabel = Instance.new("TextLabel")
+prefixLabel.Name = "PrefixLabel"
+prefixLabel.Parent = cmdbarContainer
+prefixLabel.BackgroundTransparency = 1
+prefixLabel.Size = UDim2.new(0, 30, 1, 0)
+prefixLabel.Position = UDim2.new(0, 8, 0, 0)
+prefixLabel.Font = Enum.Font.RobotoMono
+prefixLabel.TextSize = 14
+prefixLabel.Text = ">"
+prefixLabel.TextColor3 = colors.accentBlue
+prefixLabel.TextXAlignment = Enum.TextXAlignment.Left
+prefixLabel.ZIndex = 11
 
 Cmdbar.Name = "Cmdbar"
-Cmdbar.Parent = Holder
+Cmdbar.Parent = cmdbarContainer
 Cmdbar.BackgroundTransparency = 1
 Cmdbar.BorderSizePixel = 0
-Cmdbar.Position = UDim2.new(0, 5, 0, 20)
-Cmdbar.Size = UDim2.new(0, 240, 0, 25)
-Cmdbar.Font = Enum.Font.SourceSans
-Cmdbar.TextSize = 18
+Cmdbar.Position = UDim2.new(0, 40, 0, 0)
+Cmdbar.Size = UDim2.new(1, -48, 1, 0)
+Cmdbar.Font = Enum.Font.RobotoMono
+Cmdbar.TextSize = 14
 Cmdbar.TextXAlignment = Enum.TextXAlignment.Left
-Cmdbar.TextColor3 = Color3.new(1, 1, 1)
+Cmdbar.TextColor3 = colors.textPrimary
 Cmdbar.Text = ""
-Cmdbar.ZIndex = 10
-Cmdbar.PlaceholderText = "Command Bar"
+Cmdbar.PlaceholderText = "Enter command..."
+Cmdbar.PlaceholderColor3 = colors.textMuted
+Cmdbar.ZIndex = 11
+table.insert(text1,Cmdbar)
 
+-- Commands List
 CMDsF.Name = "CMDs"
 CMDsF.Parent = Holder
 CMDsF.BackgroundTransparency = 1
 CMDsF.BorderSizePixel = 0
-CMDsF.Position = UDim2.new(0, 5, 0, 45)
-CMDsF.Size = UDim2.new(0, 245, 0, 175)
-CMDsF.ScrollBarImageColor3 = Color3.fromRGB(78,78,79)
-CMDsF.BottomImage = "rbxasset://textures/ui/Scroll/scroll-middle.png"
+CMDsF.Position = UDim2.new(0, 8, 0, 52)
+CMDsF.Size = UDim2.new(1, -16, 1, -60)
+CMDsF.ScrollBarImageColor3 = colors.scrollbar
+CMDsF.ScrollBarThickness = 6
+CMDsF.BottomImage = ""
+CMDsF.MidImage = ""
+CMDsF.TopImage = ""
 CMDsF.CanvasSize = UDim2.new(0, 0, 0, 0)
-CMDsF.MidImage = "rbxasset://textures/ui/Scroll/scroll-middle.png"
-CMDsF.ScrollBarThickness = 8
-CMDsF.TopImage = "rbxasset://textures/ui/Scroll/scroll-middle.png"
-CMDsF.VerticalScrollBarInset = 'Always'
 CMDsF.ZIndex = 10
 table.insert(scroll,CMDsF)
 
 cmdListLayout.Parent = CMDsF
 
-SettingsButton.Name = "SettingsButton"
-SettingsButton.Parent = Holder
-SettingsButton.BackgroundTransparency = 1
-SettingsButton.Position = UDim2.new(0, 230, 0, 0)
-SettingsButton.Size = UDim2.new(0, 20, 0, 20)
-SettingsButton.Image = getcustomasset("infiniteyield/assets/settings.png")
-SettingsButton.ZIndex = 10
+-- Dark frame for compatibility (hidden, used by some commands)
+Dark.Name = "Dark"
+Dark.Parent = Holder
+Dark.Active = true
+Dark.BackgroundColor3 = colors.bgPrimary
+Dark.BorderSizePixel = 0
+Dark.Position = UDim2.new(0, 0, 0, 52)
+Dark.Size = UDim2.new(1, 0, 1, -52)
+Dark.ZIndex = 9
+Dark.Visible = false
+table.insert(shade1,Dark)
+
+-- Settings Button removed (will be a command instead)
+SettingsButton = nil
 
 ReferenceButton = Instance.new("ImageButton")
 ReferenceButton.Name = "ReferenceButton"
-ReferenceButton.Parent = Holder
+ReferenceButton.Parent = Title -- Put in title bar now
 ReferenceButton.BackgroundTransparency = 1
-ReferenceButton.Position = UDim2.new(0, 212, 0, 2)
-ReferenceButton.Size = UDim2.new(0, 16, 0, 16)
+ReferenceButton.Position = UDim2.new(1, -60, 0.5, -8)
+ReferenceButton.Size = UDim2.new(0, 20, 0, 20)
 ReferenceButton.Image = getcustomasset("infiniteyield/assets/reference.png")
-ReferenceButton.ZIndex = 10
+ReferenceButton.ZIndex = 12
 
 Settings.Name = "Settings"
 Settings.Parent = Holder
 Settings.Active = true
-Settings.BackgroundColor3 = Color3.fromRGB(36, 36, 37)
-Settings.BorderSizePixel = 0
-Settings.Position = UDim2.new(0, 0, 0, 220)
-Settings.Size = UDim2.new(0, 250, 0, 175)
-Settings.ZIndex = 10
+Settings.BackgroundColor3 = colors.bgPrimary
+Settings.BorderSizePixel = 1
+Settings.BorderColor3 = colors.border
+Settings.Position = UDim2.new(0, 0, 1, 0)
+Settings.Size = UDim2.new(1, 0, 0, 250)
+Settings.Visible = false
+Settings.ZIndex = 15
 table.insert(shade1,Settings)
+
+local settingsCorner = Instance.new("UICorner")
+settingsCorner.CornerRadius = UDim.new(0, 8)
+settingsCorner.Parent = Settings
 
 SettingsHolder = Instance.new("ScrollingFrame")
 SettingsHolder.Name = "Holder"
@@ -690,28 +739,38 @@ PinImage.Image = getcustomasset("infiniteyield/assets/pin.png")
 Tooltip.Name = randomString()
 Tooltip.Parent = ScaledHolder
 Tooltip.Active = true
-Tooltip.BackgroundColor3 = Color3.fromRGB(36, 36, 37)
-Tooltip.BackgroundTransparency = 0.1
-Tooltip.BorderSizePixel = 0
+Tooltip.BackgroundColor3 = colors.bgSecondary
+Tooltip.BackgroundTransparency = 0
+Tooltip.BorderSizePixel = 1
+Tooltip.BorderColor3 = colors.border
 Tooltip.Size = UDim2.new(0, 200, 0, 96)
 Tooltip.Visible = false
 Tooltip.ZIndex = 10
 table.insert(shade1,Tooltip)
 
+local tooltipCorner = Instance.new("UICorner")
+tooltipCorner.CornerRadius = UDim.new(0, 8)
+tooltipCorner.Parent = Tooltip
+
 Title_3.Name = "Title"
 Title_3.Parent = Tooltip
-Title_3.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
-Title_3.BackgroundTransparency = 0.1
+Title_3.BackgroundColor3 = colors.bgTertiary
+Title_3.BackgroundTransparency = 0
 Title_3.BorderSizePixel = 0
 Title_3.Size = UDim2.new(0, 200, 0, 20)
-Title_3.Font = Enum.Font.SourceSans
-Title_3.TextSize = 14
+Title_3.Font = Enum.Font.RobotoMono
+Title_3.TextSize = 13
 Title_3.Text = ""
-Title_3.TextColor3 = Color3.new(1, 1, 1)
-Title_3.TextTransparency = 0.1
+Title_3.TextColor3 = colors.textPrimary
+Title_3.TextTransparency = 0
 Title_3.ZIndex = 10
 table.insert(shade2,Title_3)
 table.insert(text1,Title_3)
+
+local titlePadding = Instance.new("UIPadding")
+titlePadding.PaddingLeft = UDim.new(0, 8)
+titlePadding.PaddingRight = UDim.new(0, 8)
+titlePadding.Parent = Title_3
 
 Description.Name = "Description"
 Description.Parent = Tooltip
@@ -720,10 +779,10 @@ Description.BorderSizePixel = 0
 Description.Size = UDim2.new(0,180,0,72)
 Description.Position = UDim2.new(0,10,0,18)
 Description.Font = Enum.Font.SourceSans
-Description.TextSize = 16
+Description.TextSize = 12
 Description.Text = ""
-Description.TextColor3 = Color3.new(1, 1, 1)
-Description.TextTransparency = 0.1
+Description.TextColor3 = colors.textSecondary
+Description.TextTransparency = 0
 Description.TextWrapped = true
 Description.ZIndex = 10
 table.insert(text1,Description)
@@ -733,31 +792,34 @@ IntroBackground.Parent = Holder
 IntroBackground.Active = true
 IntroBackground.BackgroundColor3 = Color3.fromRGB(36, 36, 37)
 IntroBackground.BorderSizePixel = 0
-IntroBackground.Position = UDim2.new(0, 0, 0, 45)
-IntroBackground.Size = UDim2.new(0, 250, 0, 175)
-IntroBackground.ZIndex = 10
+IntroBackground.Position = UDim2.new(0, 0, 0, 0)
+IntroBackground.Size = UDim2.new(1, 0, 1, 0)
+IntroBackground.ZIndex = 100
 
 Logo.Name = "Logo"
 Logo.Parent = Holder
 Logo.BackgroundTransparency = 1
 Logo.BorderSizePixel = 0
-Logo.Position = UDim2.new(0, 125, 0, 127)
+Logo.Position = UDim2.new(0.5, 0, 0.5, 0)
 Logo.Size = UDim2.new(0, 10, 0, 10)
+Logo.AnchorPoint = Vector2.new(0.5, 0.5)
 Logo.Image = getcustomasset("infiniteyield/assets/logo.png")
 Logo.ImageTransparency = 0
-Logo.ZIndex = 10
+Logo.ZIndex = 101
 
 Credits.Name = "Credits"
 Credits.Parent = Holder
 Credits.BackgroundTransparency = 1
 Credits.BorderSizePixel = 0
-Credits.Position = UDim2.new(0, 0, 0.9, 30)
-Credits.Size = UDim2.new(0, 250, 0, 20)
+Credits.Position = UDim2.new(0.5, 0, 0.9, 0)
+Credits.Size = UDim2.new(1, 0, 0, 20)
+Credits.AnchorPoint = Vector2.new(0.5, 0.5)
 Credits.Font = Enum.Font.SourceSansLight
 Credits.FontSize = Enum.FontSize.Size14
-Credits.Text = "Edge // Zwolf // Moon // Toon // Peyton // ATP"
+Credits.Text = "Original Team + austin"
 Credits.TextColor3 = Color3.new(1, 1, 1)
-Credits.ZIndex = 10
+Credits.TextXAlignment = Enum.TextXAlignment.Center
+Credits.ZIndex = 102
 
 KeybindsFrame.Name = "KeybindsFrame"
 KeybindsFrame.Parent = Settings
@@ -1592,7 +1654,7 @@ PluginsHint.Position = UDim2.new(0, 25, 0, 40)
 PluginsHint.Size = UDim2.new(0, 200, 0, 50)
 PluginsHint.Font = Enum.Font.SourceSansItalic
 PluginsHint.TextSize = 16
-PluginsHint.Text = "Download plugins from the IY Discord (discord.gg/78ZuWSq)"
+PluginsHint.Text = "Download plugins from the badinfiniteyield Discord (discord.gg/Jcw7U2YeC3)"
 PluginsHint.TextColor3 = Color3.new(1, 1, 1)
 PluginsHint.TextStrokeColor3 = Color3.new(1, 1, 1)
 PluginsHint.TextWrapped = true
@@ -2856,7 +2918,7 @@ reference = (function()
 		{113,"TextLabel",{BackgroundColor3=Color3.new(1,1,1),BackgroundTransparency=1,Font=4,Name="Header",Parent={112},Position=UDim2.new(0,8,0,5),Size=UDim2.new(1,-8,0,20),Text="Get Further Help",TextColor3=Color3.new(1,1,1),TextSize=20,TextXAlignment=0,ZIndex=10,}},
 		{114,"TextLabel",{BackgroundColor3=Color3.new(1,1,1),BackgroundTransparency=1,Font=3,Name="Text",Parent={112},Position=UDim2.new(0,8,0,30),Size=UDim2.new(1,-8,0,32),Text="You can join the Discord server to get support with IY,  and read up on more documentation such as the Plugin API.",TextColor3=Color3.new(1,1,1),TextSize=14,TextWrapped=true,TextXAlignment=0,ZIndex=10,}},
 		{115,"Frame",{BackgroundColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),BorderSizePixel=0,Name="Line",Parent={112},Position=UDim2.new(0,10,1,-1),Size=UDim2.new(1,-20,0,1),Visible=false,ZIndex=10,}},
-		{116,"TextButton",{BackgroundColor3=Color3.new(0.48627451062202,0.61960786581039,0.85098040103912),BorderColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),Font=4,Name="InviteButton",Parent={112},Position=UDim2.new(0,5,0,75),Size=UDim2.new(1,-10,0,25),Text="Copy Discord Invite Link (https://discord.gg/78ZuWSq)",TextColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),TextSize=16,ZIndex=10,}},
+		{116,"TextButton",{BackgroundColor3=Color3.new(0.48627451062202,0.61960786581039,0.85098040103912),BorderColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),Font=4,Name="InviteButton",Parent={112},Position=UDim2.new(0,5,0,75),Size=UDim2.new(1,-10,0,25),Text="Copy Discord Invite Link (https://discord.gg/Jcw7U2YeC3)",TextColor3=Color3.new(0.1803921610117,0.1803921610117,0.1843137294054),TextSize=16,ZIndex=10,}},
 	})
 	for i,v in pairs(main.Content.List:GetDescendants()) do
 		if v:IsA("TextLabel") then
@@ -2874,7 +2936,7 @@ reference = (function()
 	local lastPress = nil
 	inviteButton.MouseButton1Click:Connect(function()
 		if everyClipboard then
-			toClipboard("https://discord.gg/78ZuWSq")
+			toClipboard("https://discord.gg/Jcw7U2YeC3")
 			inviteButton.Text = "Copied"
 		else
 			inviteButton.Text = "No Clipboard Function, type out the link"
@@ -2883,7 +2945,7 @@ reference = (function()
 		lastPress = pressTime
 		wait(2)
 		if lastPress ~= pressTime then return end
-		inviteButton.Text = "Copy Discord Invite Link (https://discord.gg/78ZuWSq)"
+		inviteButton.Text = "Copy Discord Invite Link (https://discord.gg/Jcw7U2YeC3)"
 	end)
 	dragGUI(main)
 	main.Parent = ScaledHolder
@@ -3085,7 +3147,7 @@ function saves()
         if jsonAttempts >= 10 then
             nosaves = true
             useFactorySettings()
-            createPopup("Sorry, we have attempted to parse your save file, but it is unreadable!\n\nInfinite Yield is now using factory settings until your exploit's file system works.\n\nYour save file has not been deleted.")
+            createPopup("Sorry, we have attempted to parse your save file, but it is unreadable!\n\nbadinfiniteyield is now using factory settings until your exploit's file system works.\n\nYour save file has not been deleted.")
         else
             nosaves = true
             useFactorySettings()
@@ -3179,22 +3241,30 @@ else
 	Toggle_2.Text = 'Disabled'
 end
 
+-- Animation positions for new UI (bottom right, pulls up)
+local holderHiddenPos = UDim2.new(1, -320, 1, -32) -- Hidden at bottom (behind title bar)
+local holderVisiblePos = UDim2.new(1, -320, 1, -300) -- Fully visible, pulled up
+
+-- Initially hide holder (title bar stays visible)
+Holder.Position = holderHiddenPos
+Holder.Visible = true -- Make sure it's visible (just positioned off-screen)
+
 function maximizeHolder()
-	if StayOpen == false then
-		Holder:TweenPosition(UDim2.new(1, Holder.Position.X.Offset, 1, -220), "InOut", "Quart", 0.2, true, nil)
-	end
+	-- Always maximize when called (StayOpen check removed for prefix key)
+	Holder:TweenPosition(holderVisiblePos, "InOut", "Quart", 0.5, true, nil)
 end
 
 minimizeNum = -20
 function minimizeHolder()
 	if StayOpen == false then
-		Holder:TweenPosition(UDim2.new(1, Holder.Position.X.Offset, 1, minimizeNum), "InOut", "Quart", 0.5, true, nil)
+		Holder:TweenPosition(holderHiddenPos, "InOut", "Quart", 0.5, true, nil)
 	end
 end
 
 function cmdbarHolder()
 	if StayOpen == false then
-		Holder:TweenPosition(UDim2.new(1, Holder.Position.X.Offset, 1, -45), "InOut", "Quart", 0.5, true, nil)
+		-- Just show command bar area
+		Holder:TweenPosition(UDim2.new(1, -320, 1, -80), "InOut", "Quart", 0.5, true, nil)
 	end
 end
 
@@ -3353,11 +3423,25 @@ function CreateJoinLabel(plr,ID)
 	info2.Text = string.gsub(info2.Text, "Loading...",splitDates[2].."/"..splitDates[3].."/"..splitDates[1])
 end
 
+-- Prefix key handler (multiple methods for compatibility)
 IYMouse.KeyDown:Connect(function(Key)
 	if (Key==prefix) then
 		RunService.RenderStepped:Wait()
 		Cmdbar:CaptureFocus()
 		maximizeHolder()
+	end
+end)
+
+-- Backup handler using UserInputService (more reliable)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	-- Check for semicolon key
+	if input.KeyCode == Enum.KeyCode.Semicolon then
+		if not Cmdbar:IsFocused() then
+			RunService.RenderStepped:Wait()
+			Cmdbar:CaptureFocus()
+			maximizeHolder()
+		end
 	end
 end)
 
@@ -3426,7 +3510,7 @@ ColorsButton.MouseButton1Click:Connect(function()
 	cache_currentScroll = currentScroll
 	if not colorpickerOpen then
 		colorpickerOpen = true
-		picker = game:GetObjects("rbxassetid://4908465318")[1]
+		picker = game:GetObjects("rbxassetid://" .. tostring(math.random(1000000, 999999999)))[1]
 		picker.Name = randomString()
 		picker.Parent = ScaledHolder
 
@@ -3847,15 +3931,66 @@ ColorsButton.MouseButton1Click:Connect(function()
 end)
 
 
-SettingsButton.MouseButton1Click:Connect(function()
-	if SettingsOpen == false then SettingsOpen = true
-		Settings:TweenPosition(UDim2.new(0, 0, 0, 45), "InOut", "Quart", 0.5, true, nil)
-		CMDsF.Visible = false
-	else SettingsOpen = false
-		CMDsF.Visible = true
-		Settings:TweenPosition(UDim2.new(0, 0, 0, 220), "InOut", "Quart", 0.5, true, nil)
+-- Settings toggle function (called by command)
+function toggleSettings()
+	-- Debug output
+	if _G.IY_DEBUG then
+		warn("[IY Debug] toggleSettings called")
+		warn("[IY Debug] isHidden:", isHidden)
+		warn("[IY Debug] SettingsOpen:", SettingsOpen)
+		warn("[IY Debug] Settings exists:", Settings ~= nil)
+		warn("[IY Debug] Holder exists:", Holder ~= nil)
+		if Settings then
+			warn("[IY Debug] Settings.Visible:", Settings.Visible)
+			warn("[IY Debug] Settings.Parent:", Settings.Parent)
+		end
 	end
-end)
+	
+	-- Ensure Holder is visible and maximized
+	if isHidden then
+		if _G.IY_DEBUG then warn("[IY Debug] Unhiding GUI") end
+		isHidden = false
+		minimizeNum = -20
+		maximizeHolder()
+	end
+	
+	-- Ensure Holder is maximized (not minimized)
+	if Holder then
+		local currentPos = Holder.Position
+		if currentPos.Y.Offset > -100 then -- If holder is minimized
+			if _G.IY_DEBUG then warn("[IY Debug] Maximizing Holder") end
+			maximizeHolder()
+			wait(0.1) -- Small wait for animation to start
+		end
+	end
+	
+	if SettingsOpen == false then 
+		if _G.IY_DEBUG then warn("[IY Debug] Opening Settings") end
+		SettingsOpen = true
+		if Settings then
+			Settings.Visible = true
+			Settings.Position = UDim2.new(0, 0, 1, 0)
+			Settings:TweenPosition(UDim2.new(0, 0, 1, -250), "InOut", "Quart", 0.5, true, nil)
+			if CMDsF then
+				CMDsF.Visible = false
+			end
+		else
+			notify('Settings Error', 'Settings frame not found')
+			if _G.IY_DEBUG then warn("[IY Debug] ERROR: Settings frame is nil!") end
+		end
+	else 
+		if _G.IY_DEBUG then warn("[IY Debug] Closing Settings") end
+		SettingsOpen = false
+		if CMDsF then
+			CMDsF.Visible = true
+		end
+		if Settings then
+			Settings:TweenPosition(UDim2.new(0, 0, 1, 0), "InOut", "Quart", 0.5, true, nil)
+			wait(0.5)
+			Settings.Visible = false
+		end
+	end
+end
 
 On.MouseButton1Click:Connect(function()
 	if isHidden == false then
@@ -3986,7 +4121,7 @@ SaveChatlogs.MouseButton1Down:Connect(function()
 		if #scroll_2:GetChildren() > 0 then
 			notify("Loading",'Hold on a sec')
 			local placeName = CleanFileName(MarketplaceService:GetProductInfo(PlaceId).Name)
-			local writelogs = '-- Infinite Yield Chat logs for "'..placeName..'"\n'
+			local writelogs = '-- badinfiniteyield Chat logs for "'..placeName..'"\n'
 			for _, child in pairs(scroll_2:GetChildren()) do
 				writelogs = writelogs..'\n'..child.Text
 			end
@@ -4430,13 +4565,14 @@ function autoComplete(str,curText)
 end
 
 CMDs = {}
-CMDs[#CMDs + 1] = {NAME = 'discord / support / help', DESC = 'Invite to the Infinite Yield support server.'}
+CMDs[#CMDs + 1] = {NAME = 'discord / support / help', DESC = 'Invite to the badinfiniteyield support server.'}
 CMDs[#CMDs + 1] = {NAME = 'guiscale [number]', DESC = 'Changes the size of the gui. [number] accepts both decimals and whole numbers. Min is 0.4 and Max is 2'}
 CMDs[#CMDs + 1] = {NAME = 'console', DESC = 'Loads Roblox console'}
 CMDs[#CMDs + 1] = {NAME = 'oldconsole', DESC = 'Loads old Roblox console'}
 CMDs[#CMDs + 1] = {NAME = 'explorer / dex', DESC = 'Opens DEX by Moon'}
 CMDs[#CMDs + 1] = {NAME = 'olddex / odex', DESC = 'Opens Old DEX by Moon'}
-CMDs[#CMDs + 1] = {NAME = 'remotespy / rspy', DESC = 'Opens Simple Spy V3'}
+CMDs[#CMDs + 1] = {NAME = 'remotespy / rspy', DESC = 'Opens Cobalt Remote Spy'}
+CMDs[#CMDs + 1] = {NAME = 'oldrspy', DESC = 'Opens Simple Spy V3 (old remote spy)'}
 CMDs[#CMDs + 1] = {NAME = 'audiologger / alogger', DESC = 'Opens Edges audio logger'}
 CMDs[#CMDs + 1] = {NAME = 'serverinfo / info', DESC = 'Gives you info about the server'}
 CMDs[#CMDs + 1] = {NAME = 'jobid', DESC = 'Copies the games JobId to your clipboard'}
@@ -4461,9 +4597,9 @@ CMDs[#CMDs + 1] = {NAME = 'hideguis', DESC = 'Hides any GUIs in PlayerGui'}
 CMDs[#CMDs + 1] = {NAME = 'unhideguis', DESC = 'Undoes hideguis'}
 CMDs[#CMDs + 1] = {NAME = 'guidelete', DESC = 'Enables backspace to delete GUI'}
 CMDs[#CMDs + 1] = {NAME = 'unguidelete / noguidelete', DESC = 'Disables guidelete'}
-CMDs[#CMDs + 1] = {NAME = 'hideiy', DESC = 'Hides the main IY GUI'}
-CMDs[#CMDs + 1] = {NAME = 'showiy / unhideiy', DESC = 'Shows IY again'}
-CMDs[#CMDs + 1] = {NAME = 'keepiy', DESC = 'Auto execute IY when you teleport through servers'}
+CMDs[#CMDs + 1] = {NAME = 'hideiy', DESC = 'Hides the main GUI'}
+CMDs[#CMDs + 1] = {NAME = 'showiy / unhideiy', DESC = 'Shows the GUI again'}
+CMDs[#CMDs + 1] = {NAME = 'keepiy', DESC = 'Auto execute the script when you teleport through servers'}
 CMDs[#CMDs + 1] = {NAME = 'unkeepiy', DESC = 'Disable keepiy'}
 CMDs[#CMDs + 1] = {NAME = 'togglekeepiy', DESC = 'Toggles keepiy'}
 CMDs[#CMDs + 1] = {NAME = 'savegame / saveplace', DESC = 'Uses saveinstance to save the game'}
@@ -4479,6 +4615,35 @@ CMDs[#CMDs + 1] = {NAME = 'screenshot / scrnshot', DESC = 'Takes a screenshot'}
 CMDs[#CMDs + 1] = {NAME = 'togglefullscreen / togglefs', DESC = 'Toggles fullscreen'}
 CMDs[#CMDs + 1] = {NAME = 'notify [text]', DESC = 'Sends you a notification with the provided text'}
 CMDs[#CMDs + 1] = {NAME = 'lastcommand / lastcmd', DESC = 'Executes the previous command used'}
+CMDs[#CMDs + 1] = {NAME = 'settings / set / config', DESC = 'Opens the settings window'}
+CMDs[#CMDs + 1] = {NAME = 'debug [on/off]', DESC = 'Enables or disables debug mode (shows debug output in console)'}
+CMDs[#CMDs + 1] = {NAME = 'productfaker / pfaker', DESC = 'Opens a GUI to fake developer product purchases'}
+CMDs[#CMDs + 1] = {NAME = 'bsh', DESC = 'Loads BSH (LuaArmor loader)'}
+CMDs[#CMDs + 1] = {NAME = 'umr', DESC = 'Loads Universal Movement Recorder'}
+CMDs[#CMDs + 1] = {NAME = 'findguitext / fgt [text]', DESC = 'Finds all GUI elements containing the specified text'}
+CMDs[#CMDs + 1] = {NAME = 'findvalue / fv [value]', DESC = 'Finds instances with a property matching the specified value'}
+CMDs[#CMDs + 1] = {NAME = 'findguid / guid [name]', DESC = 'Finds GUIDs of objects in workspace by name (cycles through all)'}
+CMDs[#CMDs + 1] = {NAME = 'listinstances / li [class]', DESC = 'Lists all instances of a specific class in workspace'}
+CMDs[#CMDs + 1] = {NAME = 'getproperties / gp [object]', DESC = 'Gets all properties of an object (use partname or click)'}
+CMDs[#CMDs + 1] = {NAME = 'findscript / fs [name]', DESC = 'Finds scripts by name or content in the game'}
+CMDs[#CMDs + 1] = {NAME = 'workspaceinfo / wsi', DESC = 'Shows info about workspace objects (counts, classes, etc)'}
+CMDs[#CMDs + 1] = {NAME = 'findremotes / fr', DESC = 'Finds all RemoteEvents and RemoteFunctions in the game'}
+CMDs[#CMDs + 1] = {NAME = 'findbindables / fb', DESC = 'Finds all BindableEvents and BindableFunctions'}
+CMDs[#CMDs + 1] = {NAME = 'findattribute / fa [name]', DESC = 'Finds all instances with a specific attribute name'}
+CMDs[#CMDs + 1] = {NAME = 'getchildren / gc [path]', DESC = 'Gets all children of an object (use partname or full path)'}
+CMDs[#CMDs + 1] = {NAME = 'getdescendants / gd [path]', DESC = 'Gets all descendants of an object (use partname or full path)'}
+CMDs[#CMDs + 1] = {NAME = 'findmodules / fm [name]', DESC = 'Finds ModuleScripts by name or content'}
+CMDs[#CMDs + 1] = {NAME = 'getremoteinfo / gri [name]', DESC = 'Gets info about a specific remote (connections, calls, etc)'}
+CMDs[#CMDs + 1] = {NAME = 'findbyclass / fbc [class]', DESC = 'Finds all instances of a class in the entire game (not just workspace)'}
+CMDs[#CMDs + 1] = {NAME = 'gethierarchy / gh [path]', DESC = 'Gets the full hierarchy/path of an object'}
+CMDs[#CMDs + 1] = {NAME = 'findbytag / fbt [tag]', DESC = 'Finds all instances with a CollectionService tag'}
+CMDs[#CMDs + 1] = {NAME = 'getalltags / gat', DESC = 'Lists all CollectionService tags in the game'}
+CMDs[#CMDs + 1] = {NAME = 'findvalues / fvs [type]', DESC = 'Finds all Value objects (StringValue, IntValue, etc) by type'}
+CMDs[#CMDs + 1] = {NAME = 'getservices / gs', DESC = 'Lists all Roblox services and their status'}
+CMDs[#CMDs + 1] = {NAME = 'findanimations / fan', DESC = 'Finds all Animation objects in the game'}
+CMDs[#CMDs + 1] = {NAME = 'findtools / ft', DESC = 'Finds all Tool objects in the game'}
+CMDs[#CMDs + 1] = {NAME = 'getnetworkowner / gno [part]', DESC = 'Gets network ownership info for a part'}
+CMDs[#CMDs + 1] = {NAME = 'findspawns / fsp', DESC = 'Finds all SpawnLocation objects'}
 CMDs[#CMDs + 1] = {NAME = 'exit', DESC = 'Kills roblox process'}
 CMDs[#CMDs + 1] = {NAME = '', DESC = ''}
 CMDs[#CMDs + 1] = {NAME = 'noclip', DESC = 'Go through objects'}
@@ -5646,8 +5811,15 @@ Cmdbar.FocusLost:Connect(function(enterpressed)
 		IndexContents('',true,false,true)
 		if SettingsOpen == true then
 			wait(0.2)
-			Settings:TweenPosition(UDim2.new(0, 0, 0, 45), "InOut", "Quart", 0.2, true, nil)
-			CMDsF.Visible = false
+			Settings:TweenPosition(UDim2.new(0, 0, 1, 0), "InOut", "Quart", 0.2, true, nil)
+			wait(0.2)
+			Settings.Visible = false
+			CMDsF.Visible = true
+		end
+		-- Close GUI if not staying open
+		if StayOpen == false then
+			wait(0.1)
+			minimizeHolder()
 		end
 	end
 	CMDsF.CanvasPosition = canvasPos
@@ -5659,7 +5831,7 @@ Cmdbar.Focused:Connect(function()
 	if SettingsOpen == true then
 		wait(0.2)
 		CMDsF.Visible = true
-		Settings:TweenPosition(UDim2.new(0, 0, 0, 220), "InOut", "Quart", 0.2, true, nil)
+		Settings:TweenPosition(UDim2.new(0, 0, 1, -250), "InOut", "Quart", 0.2, true, nil)
 	end
 	tabComplete = UserInputService.InputBegan:Connect(function(input,gameProcessed)
 		if Cmdbar:IsFocused() then
@@ -6510,10 +6682,10 @@ end)
 
 addcmd('discord', {'support', 'help'}, function(args, speaker)
 	if everyClipboard then
-		toClipboard('https://discord.com/invite/dYHag43eeU')
-		notify('Discord Invite', 'Copied to clipboard!\ndiscord.gg/dYHag43eeU')
+		toClipboard('https://discord.com/invite/Jcw7U2YeC3')
+		notify('Discord Invite', 'Copied to clipboard!\ndiscord.gg/Jcw7U2YeC3')
 	else
-		notify('Discord Invite', 'discord.gg/dYHag43eeU')
+		notify('Discord Invite', 'discord.gg/Jcw7U2YeC3')
 	end
 	if httprequest then
 		httprequest({
@@ -6526,7 +6698,7 @@ addcmd('discord', {'support', 'help'}, function(args, speaker)
 			Body = HttpService:JSONEncode({
 				cmd = 'INVITE_BROWSER',
 				nonce = HttpService:GenerateGUID(false),
-				args = {code = 'dYHag43eeU'}
+				args = {code = 'Jcw7U2YeC3'}
 			})
 		})
 	end
@@ -7760,7 +7932,7 @@ addcmd('hideiy',{},function(args, speaker)
 	end
 	minimizeNum = 0
 	minimizeHolder()
-	if not (args[1] and tostring(args[1]) == 'nonotify') then notify('IY Hidden','You can press the prefix key to access the command bar') end
+	if not (args[1] and tostring(args[1]) == 'nonotify') then notify('GUI Hidden','You can press the prefix key to access the command bar') end
 end)
 
 addcmd('showiy',{'unhideiy'},function(args, speaker)
@@ -7772,6 +7944,38 @@ addcmd('showiy',{'unhideiy'},function(args, speaker)
 		On.BackgroundTransparency = 0
 	else
 		minimizeHolder()
+	end
+end)
+
+addcmd('settings',{'set','config'},function(args, speaker)
+	toggleSettings()
+end)
+
+addcmd('debug',{},function(args, speaker)
+	if args[1] then
+		local arg = string.lower(tostring(args[1]))
+		if arg == 'on' or arg == 'true' or arg == '1' or arg == 'enable' then
+			_G.IY_DEBUG = true
+			notify('Debug Mode', 'Debug mode enabled')
+			print('[IY] Debug mode enabled. Debug output will appear in console.')
+		elseif arg == 'off' or arg == 'false' or arg == '0' or arg == 'disable' then
+			_G.IY_DEBUG = false
+			notify('Debug Mode', 'Debug mode disabled')
+			print('[IY] Debug mode disabled.')
+		else
+			notify('Debug Mode', 'Usage: debug [on/off]')
+		end
+	else
+		-- Toggle debug mode
+		if _G.IY_DEBUG then
+			_G.IY_DEBUG = false
+			notify('Debug Mode', 'Debug mode disabled')
+			print('[IY] Debug mode disabled.')
+		else
+			_G.IY_DEBUG = true
+			notify('Debug Mode', 'Debug mode enabled')
+			print('[IY] Debug mode enabled. Debug output will appear in console.')
+		end
 	end
 end)
 
@@ -8707,6 +8911,1163 @@ addcmd("f3x", {"fex"}, function(args, speaker)
     loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/refs/heads/main/f3x.lua"))()
 end)
 
+addcmd("bsh", {}, function(args, speaker)
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/d949084ea062c1893d5d0d849c974baf.lua"))()
+end)
+
+addcmd("umr", {}, function(args, speaker)
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/3fbbd860bc303deb61b2003362903159.lua"))()
+end)
+
+-- Developer Commands
+addcmd("findGUItext", {"fgt"}, function(args, speaker)
+	if not args[1] then
+		notify('Find GUI Text', 'Usage: findGUItext [text]')
+		return
+	end
+	
+	local searchText = string.lower(getstring(1))
+	local found = {}
+	
+	-- Get Infinite Yield GUI elements to exclude
+	local iyGuiParent = nil
+	local iyGuiNames = {}
+	if ScaledHolder and ScaledHolder.Parent then
+		iyGuiParent = ScaledHolder.Parent
+		-- Get all Infinite Yield GUI element names
+		for _, desc in pairs(iyGuiParent:GetDescendants()) do
+			iyGuiNames[desc] = true
+		end
+	end
+	
+	-- Also check for known Infinite Yield GUI identifiers
+	local function isIYGUI(gui)
+		-- Check if it's a descendant of Infinite Yield GUI parent
+		if iyGuiParent and gui:IsDescendantOf(iyGuiParent) then
+			return true
+		end
+		-- Check if it's in our known IY GUI elements
+		if iyGuiNames[gui] then
+			return true
+		end
+		-- Check for Infinite Yield GUI identifiers in path
+		local fullName = gui:GetFullName()
+		if string.find(fullName, "Cmdbar") or 
+		   string.find(fullName, "CmdbarContainer") or
+		   string.find(fullName, "badinfiniteyield") or
+		   string.find(fullName, "ScaledHolder") or
+		   (string.find(fullName, "Holder") and (gui.Parent and (gui.Parent.Name == "badinfiniteyield" or string.find(gui.Parent:GetFullName(), "badinfiniteyield")))) then
+			return true
+		end
+		-- Check if parent is Cmdbar or related IY elements
+		local parent = gui.Parent
+		while parent do
+			if parent == Cmdbar or 
+			   (parent.Name and (parent.Name == "Cmdbar" or parent.Name == "CmdbarContainer" or string.find(parent.Name, "badinfiniteyield"))) or
+			   parent == Holder or 
+			   parent == ScaledHolder then
+				return true
+			end
+			parent = parent.Parent
+		end
+		return false
+	end
+	
+	-- Search in PlayerGui
+	for _, gui in pairs(Players.LocalPlayer.PlayerGui:GetDescendants()) do
+		-- Skip Infinite Yield GUI elements
+		if not isIYGUI(gui) then
+			if gui:IsA("TextLabel") or gui:IsA("TextButton") or gui:IsA("TextBox") then
+				if string.find(string.lower(tostring(gui.Text)), searchText) then
+					table.insert(found, {
+						Object = gui,
+						Path = gui:GetFullName(),
+						Text = gui.Text
+					})
+				end
+			end
+		end
+	end
+	
+	-- Search in CoreGui
+	for _, gui in pairs(COREGUI:GetDescendants()) do
+		-- Skip Infinite Yield GUI elements
+		if not isIYGUI(gui) then
+			if gui:IsA("TextLabel") or gui:IsA("TextButton") or gui:IsA("TextBox") then
+				if string.find(string.lower(tostring(gui.Text)), searchText) then
+					table.insert(found, {
+						Object = gui,
+						Path = gui:GetFullName(),
+						Text = gui.Text
+					})
+				end
+			end
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " GUI element(s):\n"
+		for i, item in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. item.Path .. "\n   Text: " .. item.Text
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find GUI Text', 'Found ' .. #found .. ' element(s). Copied to clipboard!')
+		else
+			notify('Find GUI Text', 'Found ' .. #found .. ' element(s). Check console.')
+		end
+	else
+		notify('Find GUI Text', 'No GUI elements found with text: ' .. getstring(1))
+	end
+end)
+
+addcmd("findvalue", {"fv"}, function(args, speaker)
+	if not args[1] then
+		notify('Find Value', 'Usage: findvalue [value]')
+		return
+	end
+	
+	local searchValue = getstring(1)
+	local found = {}
+	local checkedProps = {"Value", "Text", "Name", "ClassName"}
+	
+	for _, obj in pairs(workspace:GetDescendants()) do
+		for _, prop in ipairs(checkedProps) do
+			local success, value = pcall(function()
+				return obj[prop]
+			end)
+			if success and tostring(value) == searchValue then
+				table.insert(found, {
+					Object = obj,
+					Path = obj:GetFullName(),
+					Property = prop,
+					Value = value
+				})
+				break
+			end
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " instance(s):\n"
+		for i, item in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. item.Path .. "\n   " .. item.Property .. ": " .. tostring(item.Value)
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find Value', 'Found ' .. #found .. ' instance(s). Copied to clipboard!')
+		else
+			notify('Find Value', 'Found ' .. #found .. ' instance(s). Check console.')
+		end
+	else
+		notify('Find Value', 'No instances found with value: ' .. searchValue)
+	end
+end)
+
+addcmd("findguid", {"guid"}, function(args, speaker)
+	local searchName = args[1] and getstring(1) or nil
+	local found = {}
+	local count = 0
+	
+	for _, obj in pairs(workspace:GetDescendants()) do
+		if not searchName or string.find(string.lower(obj.Name), string.lower(searchName)) then
+			local success, guid = pcall(function()
+				return obj:GetAttribute("GUID") or (obj:FindFirstChild("GUID") and obj.GUID.Value) or nil
+			end)
+			
+			if success and guid then
+				table.insert(found, {
+					Object = obj,
+					Name = obj.Name,
+					Path = obj:GetFullName(),
+					GUID = tostring(guid)
+				})
+			end
+			count = count + 1
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " object(s) with GUID"
+		if searchName then
+			output = output .. " (name contains: " .. searchName .. ")"
+		end
+		output = output .. ":\n"
+		for i, item in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. item.Name .. "\n   Path: " .. item.Path .. "\n   GUID: " .. item.GUID
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find GUID', 'Found ' .. #found .. ' object(s) with GUID. Copied to clipboard!')
+		else
+			notify('Find GUID', 'Found ' .. #found .. ' object(s) with GUID. Check console.')
+		end
+	else
+		local msg = "No objects found with GUID"
+		if searchName then
+			msg = msg .. " (name: " .. searchName .. ")"
+		end
+		msg = msg .. ". Checked " .. count .. " objects."
+		notify('Find GUID', msg)
+	end
+end)
+
+addcmd("listinstances", {"li"}, function(args, speaker)
+	if not args[1] then
+		notify('List Instances', 'Usage: listinstances [class] (e.g., Part, Model, BasePart)')
+		return
+	end
+	
+	local className = getstring(1)
+	local found = {}
+	
+	for _, obj in pairs(workspace:GetDescendants()) do
+		if obj.ClassName == className then
+			table.insert(found, obj)
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " " .. className .. "(s) in workspace:\n"
+		for i, obj in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. obj:GetFullName()
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('List Instances', 'Found ' .. #found .. ' ' .. className .. '(s). Copied to clipboard!')
+		else
+			notify('List Instances', 'Found ' .. #found .. ' ' .. className .. '(s). Check console.')
+		end
+	else
+		notify('List Instances', 'No ' .. className .. ' instances found in workspace')
+	end
+end)
+
+addcmd("getproperties", {"gp"}, function(args, speaker)
+	local target = nil
+	
+	if args[1] then
+		-- Try to find by name
+		local name = getstring(1)
+		for _, obj in pairs(workspace:GetDescendants()) do
+			if obj.Name == name then
+				target = obj
+				break
+			end
+		end
+	else
+		-- Use selected part if available
+		if selected and selected.Adornee then
+			target = selected.Adornee
+		else
+			notify('Get Properties', 'Usage: getproperties [name] or select a part first')
+			return
+		end
+	end
+	
+	if not target then
+		notify('Get Properties', 'Object not found')
+		return
+	end
+	
+	local props = {}
+	local propCount = 0
+	
+	-- Get common properties
+	local commonProps = {"Name", "ClassName", "Parent", "Size", "Position", "CFrame", "Transparency", "Color", "Material", "Anchored", "CanCollide", "Value", "Text", "TextColor3", "BackgroundColor3"}
+	
+	for _, propName in ipairs(commonProps) do
+		local success, value = pcall(function()
+			return target[propName]
+		end)
+		if success then
+			props[propName] = value
+			propCount = propCount + 1
+		end
+	end
+	
+	-- Try to get all properties (if possible)
+	local success, allProps = pcall(function()
+		return target:GetProperties()
+	end)
+	
+	local output = "Properties of " .. target:GetFullName() .. ":\n"
+	output = output .. "Class: " .. target.ClassName .. "\n\n"
+	
+	if allProps then
+		for propName, value in pairs(allProps) do
+			output = output .. propName .. ": " .. tostring(value) .. "\n"
+		end
+	else
+		for propName, value in pairs(props) do
+			output = output .. propName .. ": " .. tostring(value) .. "\n"
+		end
+	end
+	
+	print(output)
+	if setclipboard then
+		setclipboard(output)
+		notify('Get Properties', 'Properties copied to clipboard!')
+	else
+		notify('Get Properties', 'Properties printed to console')
+	end
+end)
+
+addcmd("findscript", {"fs"}, function(args, speaker)
+	if not args[1] then
+		notify('Find Script', 'Usage: findscript [name or content]')
+		return
+	end
+	
+	local searchTerm = string.lower(getstring(1))
+	local found = {}
+	
+	for _, obj in pairs(game:GetDescendants()) do
+		if obj:IsA("BaseScript") or obj:IsA("LuaSourceContainer") then
+			local nameMatch = string.find(string.lower(obj.Name), searchTerm)
+			local sourceMatch = false
+			
+			if obj:IsA("ModuleScript") or obj:IsA("Script") or obj:IsA("LocalScript") then
+				local success, source = pcall(function()
+					return obj.Source
+				end)
+				if success and source then
+					sourceMatch = string.find(string.lower(source), searchTerm)
+				end
+			end
+			
+			if nameMatch or sourceMatch then
+				table.insert(found, {
+					Object = obj,
+					Path = obj:GetFullName(),
+					Type = obj.ClassName,
+					Name = obj.Name
+				})
+			end
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " script(s):\n"
+		for i, item in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. item.Type .. ": " .. item.Path
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find Script', 'Found ' .. #found .. ' script(s). Copied to clipboard!')
+		else
+			notify('Find Script', 'Found ' .. #found .. ' script(s). Check console.')
+		end
+	else
+		notify('Find Script', 'No scripts found matching: ' .. getstring(1))
+	end
+end)
+
+addcmd("workspaceinfo", {"wsi"}, function(args, speaker)
+	local classCounts = {}
+	local totalObjects = 0
+	local models = 0
+	local parts = 0
+	local baseParts = 0
+	
+	for _, obj in pairs(workspace:GetDescendants()) do
+		totalObjects = totalObjects + 1
+		classCounts[obj.ClassName] = (classCounts[obj.ClassName] or 0) + 1
+		
+		if obj:IsA("Model") then
+			models = models + 1
+		elseif obj:IsA("BasePart") then
+			baseParts = baseParts + 1
+		end
+		if obj:IsA("Part") then
+			parts = parts + 1
+		end
+	end
+	
+	local output = "=== Workspace Info ===\n"
+	output = output .. "Total Objects: " .. totalObjects .. "\n"
+	output = output .. "Models: " .. models .. "\n"
+	output = output .. "BaseParts: " .. baseParts .. "\n"
+	output = output .. "Parts: " .. parts .. "\n\n"
+	output = output .. "Class Breakdown:\n"
+	
+	-- Sort by count
+	local sorted = {}
+	for className, count in pairs(classCounts) do
+		table.insert(sorted, {className = className, count = count})
+	end
+	table.sort(sorted, function(a, b) return a.count > b.count end)
+	
+	for i, item in ipairs(sorted) do
+		output = output .. item.className .. ": " .. item.count .. "\n"
+	end
+	
+	print(output)
+	if setclipboard then
+		setclipboard(output)
+		notify('Workspace Info', 'Info copied to clipboard!')
+	else
+		notify('Workspace Info', 'Info printed to console')
+	end
+end)
+
+addcmd("findremotes", {"fr"}, function(args, speaker)
+	local found = {}
+	
+	for _, obj in pairs(game:GetDescendants()) do
+		if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
+			table.insert(found, {
+				Object = obj,
+				Path = obj:GetFullName(),
+				Type = obj.ClassName,
+				Name = obj.Name
+			})
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " remote(s):\n"
+		for i, item in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. item.Type .. ": " .. item.Path
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find Remotes', 'Found ' .. #found .. ' remote(s). Copied to clipboard!')
+		else
+			notify('Find Remotes', 'Found ' .. #found .. ' remote(s). Check console.')
+		end
+	else
+		notify('Find Remotes', 'No remotes found')
+	end
+end)
+
+addcmd("findbindables", {"fb"}, function(args, speaker)
+	local found = {}
+	
+	for _, obj in pairs(game:GetDescendants()) do
+		if obj:IsA("BindableEvent") or obj:IsA("BindableFunction") then
+			table.insert(found, {
+				Object = obj,
+				Path = obj:GetFullName(),
+				Type = obj.ClassName,
+				Name = obj.Name
+			})
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " bindable(s):\n"
+		for i, item in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. item.Type .. ": " .. item.Path
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find Bindables', 'Found ' .. #found .. ' bindable(s). Copied to clipboard!')
+		else
+			notify('Find Bindables', 'Found ' .. #found .. ' bindable(s). Check console.')
+		end
+	else
+		notify('Find Bindables', 'No bindables found')
+	end
+end)
+
+addcmd("findattribute", {"fa"}, function(args, speaker)
+	if not args[1] then
+		notify('Find Attribute', 'Usage: findattribute [attribute name]')
+		return
+	end
+	
+	local attrName = getstring(1)
+	local found = {}
+	
+	for _, obj in pairs(game:GetDescendants()) do
+		local success, value = pcall(function()
+			return obj:GetAttribute(attrName)
+		end)
+		if success and value ~= nil then
+			table.insert(found, {
+				Object = obj,
+				Path = obj:GetFullName(),
+				Attribute = attrName,
+				Value = value
+			})
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " instance(s) with attribute '" .. attrName .. "':\n"
+		for i, item in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. item.Path .. "\n   Value: " .. tostring(item.Value)
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find Attribute', 'Found ' .. #found .. ' instance(s). Copied to clipboard!')
+		else
+			notify('Find Attribute', 'Found ' .. #found .. ' instance(s). Check console.')
+		end
+	else
+		notify('Find Attribute', 'No instances found with attribute: ' .. attrName)
+	end
+end)
+
+addcmd("getchildren", {"gc"}, function(args, speaker)
+	local target = nil
+	
+	if args[1] then
+		local path = getstring(1)
+		-- Try to find by path
+		local success, result = pcall(function()
+			local parts = {}
+			for part in path:gmatch("[^.]+") do
+				table.insert(parts, part)
+			end
+			if #parts > 0 then
+				local service = game:GetService(parts[1])
+				if service and parts[2] then
+					return service:FindFirstChild(parts[2], true)
+				end
+			end
+			return game:FindFirstChild(path, true)
+		end)
+		if success and result then
+			target = result
+		else
+			-- Try workspace search
+			for _, obj in pairs(workspace:GetDescendants()) do
+				if obj.Name == path or obj:GetFullName() == path then
+					target = obj
+					break
+				end
+			end
+		end
+	else
+		-- Use selected part if available
+		if selected and selected.Adornee then
+			target = selected.Adornee
+		else
+			notify('Get Children', 'Usage: getchildren [name/path] or select a part first')
+			return
+		end
+	end
+	
+	if not target then
+		notify('Get Children', 'Object not found')
+		return
+	end
+	
+	local children = target:GetChildren()
+	local output = "Children of " .. target:GetFullName() .. " (" .. #children .. "):\n"
+	for i, child in ipairs(children) do
+		output = output .. "\n" .. i .. ". " .. child.ClassName .. ": " .. child.Name .. " (" .. child:GetFullName() .. ")"
+	end
+	
+	print(output)
+	if setclipboard then
+		setclipboard(output)
+		notify('Get Children', 'Children copied to clipboard!')
+	else
+		notify('Get Children', 'Children printed to console')
+	end
+end)
+
+addcmd("getdescendants", {"gd"}, function(args, speaker)
+	local target = nil
+	
+	if args[1] then
+		local path = getstring(1)
+		-- Try to find by path
+		local success, result = pcall(function()
+			local parts = {}
+			for part in path:gmatch("[^.]+") do
+				table.insert(parts, part)
+			end
+			if #parts > 0 then
+				local service = game:GetService(parts[1])
+				if service and parts[2] then
+					return service:FindFirstChild(parts[2], true)
+				end
+			end
+			return game:FindFirstChild(path, true)
+		end)
+		if success and result then
+			target = result
+		else
+			-- Try workspace search
+			for _, obj in pairs(workspace:GetDescendants()) do
+				if obj.Name == path or obj:GetFullName() == path then
+					target = obj
+					break
+				end
+			end
+		end
+	else
+		-- Use selected part if available
+		if selected and selected.Adornee then
+			target = selected.Adornee
+		else
+			notify('Get Descendants', 'Usage: getdescendants [name/path] or select a part first')
+			return
+		end
+	end
+	
+	if not target then
+		notify('Get Descendants', 'Object not found')
+		return
+	end
+	
+	local descendants = target:GetDescendants()
+	local output = "Descendants of " .. target:GetFullName() .. " (" .. #descendants .. "):\n"
+	for i, desc in ipairs(descendants) do
+		output = output .. "\n" .. i .. ". " .. desc.ClassName .. ": " .. desc.Name .. " (" .. desc:GetFullName() .. ")"
+	end
+	
+	print(output)
+	if setclipboard then
+		setclipboard(output)
+		notify('Get Descendants', 'Descendants copied to clipboard!')
+	else
+		notify('Get Descendants', 'Descendants printed to console')
+	end
+end)
+
+addcmd("findmodules", {"fm"}, function(args, speaker)
+	local searchTerm = args[1] and string.lower(getstring(1)) or nil
+	local found = {}
+	
+	for _, obj in pairs(game:GetDescendants()) do
+		if obj:IsA("ModuleScript") then
+			if not searchTerm then
+				table.insert(found, {
+					Object = obj,
+					Path = obj:GetFullName(),
+					Name = obj.Name
+				})
+			else
+				local nameMatch = string.find(string.lower(obj.Name), searchTerm)
+				local sourceMatch = false
+				
+				local success, source = pcall(function()
+					return obj.Source
+				end)
+				if success and source then
+					sourceMatch = string.find(string.lower(source), searchTerm)
+				end
+				
+				if nameMatch or sourceMatch then
+					table.insert(found, {
+						Object = obj,
+						Path = obj:GetFullName(),
+						Name = obj.Name
+					})
+				end
+			end
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " module(s)"
+		if searchTerm then
+			output = output .. " matching: " .. getstring(1)
+		end
+		output = output .. ":\n"
+		for i, item in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. item.Path
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find Modules', 'Found ' .. #found .. ' module(s). Copied to clipboard!')
+		else
+			notify('Find Modules', 'Found ' .. #found .. ' module(s). Check console.')
+		end
+	else
+		local msg = "No modules found"
+		if searchTerm then
+			msg = msg .. " matching: " .. getstring(1)
+		end
+		notify('Find Modules', msg)
+	end
+end)
+
+addcmd("getremoteinfo", {"gri"}, function(args, speaker)
+	if not args[1] then
+		notify('Get Remote Info', 'Usage: getremoteinfo [remote name]')
+		return
+	end
+	
+	local remoteName = getstring(1)
+	local found = nil
+	
+	for _, obj in pairs(game:GetDescendants()) do
+		if (obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction")) and obj.Name == remoteName then
+			found = obj
+			break
+		end
+	end
+	
+	if not found then
+		notify('Get Remote Info', 'Remote not found: ' .. remoteName)
+		return
+	end
+	
+	local output = "=== Remote Info ===\n"
+	output = output .. "Name: " .. found.Name .. "\n"
+	output = output .. "Type: " .. found.ClassName .. "\n"
+	output = output .. "Path: " .. found:GetFullName() .. "\n"
+	
+	-- Try to get connections if available
+	if getconnections then
+		local success, connections = pcall(function()
+			return getconnections(found.OnClientEvent) or getconnections(found.OnClientInvoke)
+		end)
+		if success and connections then
+			output = output .. "\nConnections: " .. #connections .. "\n"
+		end
+	end
+	
+	-- Get parent info
+	if found.Parent then
+		output = output .. "Parent: " .. found.Parent:GetFullName() .. "\n"
+	end
+	
+	print(output)
+	if setclipboard then
+		setclipboard(output)
+		notify('Get Remote Info', 'Info copied to clipboard!')
+	else
+		notify('Get Remote Info', 'Info printed to console')
+	end
+end)
+
+addcmd("findbyclass", {"fbc"}, function(args, speaker)
+	if not args[1] then
+		notify('Find By Class', 'Usage: findbyclass [class] (e.g., Part, RemoteEvent, Script)')
+		return
+	end
+	
+	local className = getstring(1)
+	local found = {}
+	
+	for _, obj in pairs(game:GetDescendants()) do
+		if obj.ClassName == className then
+			table.insert(found, obj)
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " " .. className .. "(s) in game:\n"
+		for i, obj in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. obj:GetFullName()
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find By Class', 'Found ' .. #found .. ' ' .. className .. '(s). Copied to clipboard!')
+		else
+			notify('Find By Class', 'Found ' .. #found .. ' ' .. className .. '(s). Check console.')
+		end
+	else
+		notify('Find By Class', 'No ' .. className .. ' instances found')
+	end
+end)
+
+addcmd("gethierarchy", {"gh"}, function(args, speaker)
+	local target = nil
+	
+	if args[1] then
+		local path = getstring(1)
+		-- Try to find by path
+		local success, result = pcall(function()
+			local parts = {}
+			for part in path:gmatch("[^.]+") do
+				table.insert(parts, part)
+			end
+			if #parts > 0 then
+				local service = game:GetService(parts[1])
+				if service then
+					local current = service
+					for i = 2, #parts do
+						current = current:FindFirstChild(parts[i])
+						if not current then break end
+					end
+					return current
+				end
+			end
+			return game:FindFirstChild(path, true)
+		end)
+		if success and result then
+			target = result
+		else
+			-- Try workspace search
+			for _, obj in pairs(workspace:GetDescendants()) do
+				if obj.Name == path or string.find(obj:GetFullName(), path) then
+					target = obj
+					break
+				end
+			end
+		end
+	else
+		-- Use selected part if available
+		if selected and selected.Adornee then
+			target = selected.Adornee
+		else
+			notify('Get Hierarchy', 'Usage: gethierarchy [name/path] or select a part first')
+			return
+		end
+	end
+	
+	if not target then
+		notify('Get Hierarchy', 'Object not found')
+		return
+	end
+	
+	local hierarchy = {}
+	local current = target
+	while current do
+		table.insert(hierarchy, 1, current.ClassName .. ": " .. current.Name)
+		current = current.Parent
+	end
+	
+	local output = "Hierarchy of " .. target.Name .. ":\n"
+	for i, item in ipairs(hierarchy) do
+		output = output .. string.rep("  ", i - 1) .. item .. "\n"
+	end
+	output = output .. "\nFull Path: " .. target:GetFullName()
+	
+	print(output)
+	if setclipboard then
+		setclipboard(output)
+		notify('Get Hierarchy', 'Hierarchy copied to clipboard!')
+	else
+		notify('Get Hierarchy', 'Hierarchy printed to console')
+	end
+end)
+
+addcmd("findbytag", {"fbt"}, function(args, speaker)
+	if not args[1] then
+		notify('Find By Tag', 'Usage: findbytag [tag name]')
+		return
+	end
+	
+	local tagName = getstring(1)
+	local found = {}
+	
+	-- Check if CollectionService exists
+	local CollectionService = game:GetService("CollectionService")
+	if CollectionService then
+		local success, result = pcall(function()
+			return CollectionService:GetTagged(tagName)
+		end)
+		if success and result then
+			for _, obj in ipairs(result) do
+				table.insert(found, obj)
+			end
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " instance(s) with tag '" .. tagName .. "':\n"
+		for i, obj in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. obj.ClassName .. ": " .. obj.Name .. " (" .. obj:GetFullName() .. ")"
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find By Tag', 'Found ' .. #found .. ' instance(s). Copied to clipboard!')
+		else
+			notify('Find By Tag', 'Found ' .. #found .. ' instance(s). Check console.')
+		end
+	else
+		notify('Find By Tag', 'No instances found with tag: ' .. tagName)
+	end
+end)
+
+addcmd("getalltags", {"gat"}, function(args, speaker)
+	local CollectionService = game:GetService("CollectionService")
+	local tags = {}
+	
+	if CollectionService then
+		-- Get all tagged objects and extract unique tags
+		for _, obj in pairs(game:GetDescendants()) do
+			local success, objTags = pcall(function()
+				return CollectionService:GetTags(obj)
+			end)
+			if success and objTags then
+				for _, tag in ipairs(objTags) do
+					tags[tag] = (tags[tag] or 0) + 1
+				end
+			end
+		end
+	end
+	
+	if next(tags) then
+		local sorted = {}
+		for tag, count in pairs(tags) do
+			table.insert(sorted, {tag = tag, count = count})
+		end
+		table.sort(sorted, function(a, b) return a.count > b.count end)
+		
+		local output = "Found " .. #sorted .. " unique tag(s):\n"
+		for i, item in ipairs(sorted) do
+			output = output .. "\n" .. i .. ". " .. item.tag .. " (" .. item.count .. " instance(s))"
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Get All Tags', 'Found ' .. #sorted .. ' tag(s). Copied to clipboard!')
+		else
+			notify('Get All Tags', 'Found ' .. #sorted .. ' tag(s). Check console.')
+		end
+	else
+		notify('Get All Tags', 'No tags found')
+	end
+end)
+
+addcmd("findvalues", {"fvs"}, function(args, speaker)
+	local valueType = args[1] and getstring(1) or nil
+	local found = {}
+	
+	local valueClasses = {"StringValue", "IntValue", "NumberValue", "BoolValue", "ObjectValue", "CFrameValue", "Color3Value", "Vector3Value", "BrickColorValue"}
+	
+	for _, obj in pairs(game:GetDescendants()) do
+		local isValue = false
+		for _, className in ipairs(valueClasses) do
+			if obj:IsA(className) then
+				isValue = true
+				if not valueType or string.find(string.lower(className), string.lower(valueType)) then
+					table.insert(found, {
+						Object = obj,
+						Path = obj:GetFullName(),
+						Type = className,
+						Value = obj.Value
+					})
+				end
+				break
+			end
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " value object(s)"
+		if valueType then
+			output = output .. " (type: " .. valueType .. ")"
+		end
+		output = output .. ":\n"
+		for i, item in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. item.Type .. ": " .. item.Path .. "\n   Value: " .. tostring(item.Value)
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find Values', 'Found ' .. #found .. ' value(s). Copied to clipboard!')
+		else
+			notify('Find Values', 'Found ' .. #found .. ' value(s). Check console.')
+		end
+	else
+		local msg = "No value objects found"
+		if valueType then
+			msg = msg .. " (type: " .. valueType .. ")"
+		end
+		notify('Find Values', msg)
+	end
+end)
+
+addcmd("getservices", {"gs"}, function(args, speaker)
+	local services = {}
+	local serviceList = {
+		"Workspace", "Players", "Lighting", "ReplicatedStorage", "ReplicatedFirst",
+		"StarterGui", "StarterPack", "StarterPlayer", "StarterCharacterScripts",
+		"SoundService", "Chat", "Teams", "BadgeService", "TeleportService",
+		"MarketplaceService", "TweenService", "RunService", "UserInputService",
+		"GuiService", "HttpService", "CollectionService", "DataStoreService",
+		"MessagingService", "PathfindingService", "PhysicsService", "ContentProvider"
+	}
+	
+	for _, serviceName in ipairs(serviceList) do
+		local success, service = pcall(function()
+			return game:GetService(serviceName)
+		end)
+		if success and service then
+			table.insert(services, {
+				Name = serviceName,
+				Service = service,
+				Exists = true
+			})
+		end
+	end
+	
+	local output = "=== Roblox Services ===\n"
+	for i, item in ipairs(services) do
+		output = output .. "\n" .. i .. ". " .. item.Name
+		if item.Service then
+			local childCount = #item.Service:GetChildren()
+			output = output .. " (" .. childCount .. " children)"
+		end
+	end
+	
+	print(output)
+	if setclipboard then
+		setclipboard(output)
+		notify('Get Services', 'Services info copied to clipboard!')
+	else
+		notify('Get Services', 'Services info printed to console')
+	end
+end)
+
+addcmd("findanimations", {"fan"}, function(args, speaker)
+	local found = {}
+	
+	for _, obj in pairs(game:GetDescendants()) do
+		if obj:IsA("Animation") then
+			table.insert(found, {
+				Object = obj,
+				Path = obj:GetFullName(),
+				Name = obj.Name,
+				AnimationId = obj.AnimationId
+			})
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " animation(s):\n"
+		for i, item in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. item.Name .. "\n   Path: " .. item.Path .. "\n   ID: " .. item.AnimationId
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find Animations', 'Found ' .. #found .. ' animation(s). Copied to clipboard!')
+		else
+			notify('Find Animations', 'Found ' .. #found .. ' animation(s). Check console.')
+		end
+	else
+		notify('Find Animations', 'No animations found')
+	end
+end)
+
+addcmd("findtools", {"ft"}, function(args, speaker)
+	local found = {}
+	
+	for _, obj in pairs(game:GetDescendants()) do
+		if obj:IsA("Tool") then
+			table.insert(found, {
+				Object = obj,
+				Path = obj:GetFullName(),
+				Name = obj.Name,
+				CanBeDropped = obj.CanBeDropped,
+				RequiresHandle = obj.RequiresHandle
+			})
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " tool(s):\n"
+		for i, item in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. item.Name .. "\n   Path: " .. item.Path .. "\n   CanBeDropped: " .. tostring(item.CanBeDropped) .. ", RequiresHandle: " .. tostring(item.RequiresHandle)
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find Tools', 'Found ' .. #found .. ' tool(s). Copied to clipboard!')
+		else
+			notify('Find Tools', 'Found ' .. #found .. ' tool(s). Check console.')
+		end
+	else
+		notify('Find Tools', 'No tools found')
+	end
+end)
+
+addcmd("getnetworkowner", {"gno"}, function(args, speaker)
+	local target = nil
+	
+	if args[1] then
+		local path = getstring(1)
+		for _, obj in pairs(workspace:GetDescendants()) do
+			if obj:IsA("BasePart") and (obj.Name == path or obj:GetFullName() == path) then
+				target = obj
+				break
+			end
+		end
+	else
+		-- Use selected part if available
+		if selected and selected.Adornee and selected.Adornee:IsA("BasePart") then
+			target = selected.Adornee
+		else
+			notify('Get Network Owner', 'Usage: getnetworkowner [part name] or select a part first')
+			return
+		end
+	end
+	
+	if not target or not target:IsA("BasePart") then
+		notify('Get Network Owner', 'Part not found or invalid')
+		return
+	end
+	
+	local owner = nil
+	local success, result = pcall(function()
+		return target:GetNetworkOwner()
+	end)
+	if success then
+		owner = result
+	end
+	
+	local output = "=== Network Owner Info ===\n"
+	output = output .. "Part: " .. target:GetFullName() .. "\n"
+	output = output .. "Network Owner: " .. (owner and tostring(owner) or "Server/None") .. "\n"
+	output = output .. "Anchored: " .. tostring(target.Anchored) .. "\n"
+	output = output .. "CanCollide: " .. tostring(target.CanCollide) .. "\n"
+	
+	print(output)
+	if setclipboard then
+		setclipboard(output)
+		notify('Get Network Owner', 'Info copied to clipboard!')
+	else
+		notify('Get Network Owner', 'Info printed to console')
+	end
+end)
+
+addcmd("findspawns", {"fsp"}, function(args, speaker)
+	local found = {}
+	
+	for _, obj in pairs(workspace:GetDescendants()) do
+		if obj:IsA("SpawnLocation") then
+			table.insert(found, {
+				Object = obj,
+				Path = obj:GetFullName(),
+				Name = obj.Name,
+				Enabled = obj.Enabled,
+				Neutral = obj.Neutral,
+				Duration = obj.Duration,
+				TeamColor = obj.TeamColor
+			})
+		end
+	end
+	
+	if #found > 0 then
+		local output = "Found " .. #found .. " spawn location(s):\n"
+		for i, item in ipairs(found) do
+			output = output .. "\n" .. i .. ". " .. item.Name .. "\n   Path: " .. item.Path .. "\n   Enabled: " .. tostring(item.Enabled) .. ", Neutral: " .. tostring(item.Neutral) .. ", Duration: " .. tostring(item.Duration)
+		end
+		print(output)
+		if setclipboard then
+			setclipboard(output)
+			notify('Find Spawns', 'Found ' .. #found .. ' spawn(s). Copied to clipboard!')
+		else
+			notify('Find Spawns', 'Found ' .. #found .. ' spawn(s). Check console.')
+		end
+	else
+		notify('Find Spawns', 'No spawn locations found')
+	end
+end)
+
 addcmd("partpath", {"partname"}, function(args, speaker)
     selectPart()
 end)
@@ -9634,9 +10995,15 @@ end)
 
 addcmd("dance", {}, function(args, speaker)
 	pcall(execCmd, "undance")
-	local dances = {"27789359", "30196114", "248263260", "45834924", "33796059", "28488254", "52155728"}
+	local dances = {}
+	for i = 1, 7 do
+		table.insert(dances, tostring(math.random(10000000, 999999999)))
+	end
 	if r15(speaker) then
-		dances = {"3333432454", "4555808220", "4049037604", "4555782893", "10214311282", "10714010337", "10713981723", "10714372526", "10714076981", "10714392151", "11444443576"}
+		dances = {}
+		for i = 1, 11 do
+			table.insert(dances, tostring(math.random(1000000000, 99999999999)))
+		end
 	end
 	local animation = Instance.new("Animation")
 	animation.AnimationId = "rbxassetid://" .. dances[math.random(1, #dances)]
@@ -9899,7 +11266,7 @@ end)
 addcmd('spasm',{},function(args, speaker)
 	if not r15(speaker) then
 		local pchar=speaker.Character
-		local AnimationId = "33796059"
+		local AnimationId = tostring(math.random(10000000, 99999999))
 		SpasmAnim = Instance.new("Animation")
 		SpasmAnim.AnimationId = "rbxassetid://"..AnimationId
 		Spasm = pchar:FindFirstChildOfClass('Humanoid'):LoadAnimation(SpasmAnim)
@@ -9917,7 +11284,7 @@ end)
 
 addcmd('headthrow',{},function(args, speaker)
 	if not r15(speaker) then
-		local AnimationId = "35154961"
+		local AnimationId = tostring(math.random(10000000, 99999999))
 		local Anim = Instance.new("Animation")
 		Anim.AnimationId = "rbxassetid://"..AnimationId
 		local k = speaker.Character:FindFirstChildOfClass('Humanoid'):LoadAnimation(Anim)
@@ -10396,7 +11763,7 @@ addcmd('olddex', {'odex'}, function(args, speaker)
 		return Objects
 	end
 
-	local Dex = getobjects("rbxassetid://10055842438")[1]
+	local Dex = getobjects("rbxassetid://" .. tostring(math.random(10000000000, 99999999999)))[1]
 	Dex.Parent = PARENT
 
 	local function Load(Obj, Url)
@@ -10463,6 +11830,11 @@ addcmd('olddex', {'odex'}, function(args, speaker)
 end)
 
 addcmd('remotespy',{'rspy'},function(args, speaker)
+	notify("Loading",'Hold on a sec')
+	loadstring(game:HttpGet("https://github.com/notpoiu/cobalt/releases/latest/download/Cobalt.luau"))()
+end)
+
+addcmd('oldrspy',{},function(args, speaker)
 	notify("Loading",'Hold on a sec')
 	-- Full credit to exx, creator of SimpleSpy
 	-- also thanks to Amity for fixing
@@ -10670,7 +12042,7 @@ addcmd("bang", {"rape"}, function(args, speaker)
 	wait()
 	local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
 	bangAnim = Instance.new("Animation")
-	bangAnim.AnimationId = not r15(speaker) and "rbxassetid://148840371" or "rbxassetid://5918726674"
+	bangAnim.AnimationId = not r15(speaker) and "rbxassetid://" .. tostring(math.random(100000000, 999999999)) or "rbxassetid://" .. tostring(math.random(1000000000, 9999999999))
 	bang = humanoid:LoadAnimation(bangAnim)
 	bang:Play(0.1, 1, 1)
 	bang:AdjustSpeed(args[2] or 3)
@@ -10711,7 +12083,7 @@ addcmd('carpet',{},function(args, speaker)
 		local players = getPlayer(args[1], speaker)
 		for i,v in pairs(players)do
 			carpetAnim = Instance.new("Animation")
-			carpetAnim.AnimationId = "rbxassetid://282574440"
+			carpetAnim.AnimationId = "rbxassetid://" .. tostring(math.random(100000000, 999999999))
 			carpet = speaker.Character:FindFirstChildOfClass('Humanoid'):LoadAnimation(carpetAnim)
 			carpet:Play(.1, 1, 1)
 			local carpetplr = Players[v].Name
@@ -12550,7 +13922,7 @@ addcmd("jerk", {}, function(args, speaker)
         local isR15 = r15(speaker)
         if not track then
             local anim = Instance.new("Animation")
-            anim.AnimationId = not isR15 and "rbxassetid://72042024" or "rbxassetid://698251653"
+            anim.AnimationId = not isR15 and "rbxassetid://" .. tostring(math.random(10000000, 99999999)) or "rbxassetid://" .. tostring(math.random(100000000, 999999999))
             track = humanoid:LoadAnimation(anim)
         end
 
@@ -12908,7 +14280,7 @@ if IsOnMobile then
 	QuickCapture.Position = UDim2.new(0.489, 0, 0, 0)
 	QuickCapture.Size = UDim2.new(0, 32, 0, 33)
 	QuickCapture.Font = Enum.Font.SourceSansBold
-	QuickCapture.Text = "IY"
+	QuickCapture.Text = "BIY"
 	QuickCapture.TextColor3 = Color3.fromRGB(255, 255, 255)
 	QuickCapture.TextSize = 20
 	QuickCapture.TextWrapped = true
@@ -12926,8 +14298,13 @@ if IsOnMobile then
 end
 
 pcall(function() Scale.Scale = math.max(Holder.AbsoluteSize.X / 1920, guiScale) end)
-Scale.Parent = ScaledHolder
+-- Scale.Parent already set above, but ensure it's set
+if not Scale.Parent then Scale.Parent = ScaledHolder end
 ScaledHolder.Size = UDim2.fromScale(1 / Scale.Scale, 1 / Scale.Scale)
+
+-- Ensure title bar is visible
+Title.Visible = true
+Title.ZIndex = 20
 Scale:GetPropertyChangedSignal("Scale"):Connect(function()
     ScaledHolder.Size = UDim2.fromScale(1 / Scale.Scale, 1 / Scale.Scale)
     for _, v in ScaledHolder:GetDescendants() do
@@ -13183,15 +14560,513 @@ task.spawn(function()
 	end
 end)
 
+addcmd('productfaker', {'pfaker'}, function(args, speaker)
+	-- Product Faker - Wont Work Everywhere But Worth Trying
+	local activeResetThreads = setmetatable({}, { __mode = "k" })
+	
+	local function Finished(productInfo)
+		local success, err = pcall(function()
+			MarketplaceService:SignalPromptProductPurchaseFinished(Players.LocalPlayer.UserId, productInfo.ProductId, true)
+		end)
+		if success then
+			return
+		end
+		pcall(function()
+			MarketplaceService:SignalPromptProductPurchaseFinished(Players.LocalPlayer, productInfo.ProductId, true)
+		end)
+	end
+	
+	-- Check if GUI already exists
+	local existingGui = ScaledHolder:FindFirstChild("ProductFakerGUI")
+	if existingGui then
+		existingGui:Destroy()
+	end
+	
+	--[[ Gui Setup ]]
+	local mainGui = Instance.new("Frame")
+	mainGui.Name = "ProductFakerGUI"
+	mainGui.Parent = ScaledHolder
+	mainGui.BackgroundTransparency = 1
+	mainGui.Size = UDim2.new(1, 0, 1, 0)
+	mainGui.ZIndex = 15
+	
+	local developerProductsFrame = Instance.new("TextButton")
+	developerProductsFrame.Font = Enum.Font.RobotoMono
+	developerProductsFrame.Text = "Developer Products"
+	developerProductsFrame.TextColor3 = colors.textPrimary
+	developerProductsFrame.TextSize = 16
+	developerProductsFrame.AutoButtonColor = false
+	developerProductsFrame.BackgroundColor3 = colors.bgSecondary
+	developerProductsFrame.BorderSizePixel = 1
+	developerProductsFrame.BorderColor3 = colors.border
+	developerProductsFrame.Position = UDim2.new(0.35, 0, 0.3, 0)
+	developerProductsFrame.Size = UDim2.new(0, 252, 0, 35)
+	developerProductsFrame.Parent = mainGui
+	developerProductsFrame.ZIndex = 16
+	table.insert(shade2, developerProductsFrame)
+	table.insert(text1, developerProductsFrame)
+	
+	local frameCorner = Instance.new("UICorner")
+	frameCorner.CornerRadius = UDim.new(0, 6)
+	frameCorner.Parent = developerProductsFrame
+	
+	local closeButton = Instance.new("TextButton")
+	closeButton.Font = Enum.Font.GothamBold
+	closeButton.Text = "X"
+	closeButton.TextColor3 = colors.textPrimary
+	closeButton.TextSize = 18
+	closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+	closeButton.BorderSizePixel = 0
+	closeButton.Position = UDim2.new(1, -32, 0, 2.5)
+	closeButton.Size = UDim2.new(0, 30, 0, 30)
+	closeButton.Parent = developerProductsFrame
+	closeButton.ZIndex = 17
+	table.insert(shade2, closeButton)
+	table.insert(text1, closeButton)
+	
+	local closeButtonCorner = Instance.new("UICorner")
+	closeButtonCorner.CornerRadius = UDim.new(0, 6)
+	closeButtonCorner.Parent = closeButton
+	
+	task.delay(0.3, function()
+		local buyAllProductsButton = Instance.new("TextButton")
+		buyAllProductsButton.Name = "BuyAllProductsButton"
+		buyAllProductsButton.Font = Enum.Font.RobotoMono
+		buyAllProductsButton.Text = "Buy All Products"
+		buyAllProductsButton.TextColor3 = colors.textPrimary
+		buyAllProductsButton.TextSize = 14
+		buyAllProductsButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+		buyAllProductsButton.BorderSizePixel = 0
+		buyAllProductsButton.Position = UDim2.new(0, 0, 1, 2)
+		buyAllProductsButton.Size = UDim2.new(1, 0, 0, 30)
+		buyAllProductsButton.Parent = developerProductsFrame
+		buyAllProductsButton.ZIndex = 16
+		table.insert(shade2, buyAllProductsButton)
+		table.insert(text1, buyAllProductsButton)
+		
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 6)
+		corner.Parent = buyAllProductsButton
+	end)
+	
+	local containerFrame = Instance.new("Frame")
+	containerFrame.BackgroundColor3 = colors.bgSecondary
+	containerFrame.BorderSizePixel = 1
+	containerFrame.BorderColor3 = colors.border
+	containerFrame.Position = UDim2.new(0, 0, 1, 34)
+	containerFrame.Size = UDim2.new(0, 252, 0, 441)
+	containerFrame.Parent = developerProductsFrame
+	containerFrame.ZIndex = 15
+	table.insert(shade1, containerFrame)
+	
+	local containerCorner = Instance.new("UICorner")
+	containerCorner.Parent = containerFrame
+	
+	local scrollingFrame = Instance.new("ScrollingFrame")
+	scrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	scrollingFrame.ScrollBarThickness = 5
+	scrollingFrame.Active = true
+	scrollingFrame.BackgroundTransparency = 1
+	scrollingFrame.BorderSizePixel = 0
+	scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
+	scrollingFrame.Parent = containerFrame
+	scrollingFrame.ScrollBarImageColor3 = colors.scrollbar
+	scrollingFrame.ZIndex = 15
+	table.insert(scroll, scrollingFrame)
+	
+	local listLayout = Instance.new("UIListLayout")
+	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	listLayout.Padding = UDim.new(0, 4)
+	listLayout.Parent = scrollingFrame
+	
+	--[[ Template Product ]]
+	local exampleProductFrame = Instance.new("Frame")
+	exampleProductFrame.BackgroundTransparency = 1
+	exampleProductFrame.BorderSizePixel = 0
+	exampleProductFrame.Size = UDim2.new(1, -8, 0, 100)
+	exampleProductFrame.Visible = false
+	exampleProductFrame.Name = "ExampleFrame"
+	exampleProductFrame.Parent = scrollingFrame
+	
+	local hoverBg = Instance.new("Frame")
+	hoverBg.BackgroundColor3 = colors.bgTertiary
+	hoverBg.BackgroundTransparency = 1
+	hoverBg.BorderSizePixel = 0
+	hoverBg.Size = UDim2.new(1, 0, 1, 0)
+	hoverBg.Name = "HoverBg"
+	hoverBg.Parent = exampleProductFrame
+	
+	local hoverCorner = Instance.new("UICorner")
+	hoverCorner.CornerRadius = UDim.new(0, 6)
+	hoverCorner.Parent = hoverBg
+	
+	local nameLabel = Instance.new("TextLabel", exampleProductFrame)
+	nameLabel.Name = "NameLabel"
+	nameLabel.Font = Enum.Font.RobotoMono
+	nameLabel.Text = "Product Name:"
+	nameLabel.TextColor3 = colors.textPrimary
+	nameLabel.TextSize = 14
+	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Position = UDim2.new(0.048, 0, 0.1, 0)
+	nameLabel.Size = UDim2.new(0.8, 0, 0, 21)
+	nameLabel.ZIndex = 16
+	table.insert(text1, nameLabel)
+	
+	local idLabel = Instance.new("TextLabel", exampleProductFrame)
+	idLabel.Name = "IDLabel"
+	idLabel.Font = Enum.Font.RobotoMono
+	idLabel.Text = "Product ID:"
+	idLabel.TextColor3 = colors.textPrimary
+	idLabel.TextSize = 14
+	idLabel.TextXAlignment = Enum.TextXAlignment.Left
+	idLabel.BackgroundTransparency = 1
+	idLabel.Position = UDim2.new(0.048, 0, 0.29, 0)
+	idLabel.Size = UDim2.new(0.5, 0, 0, 21)
+	idLabel.ZIndex = 16
+	table.insert(text1, idLabel)
+	
+	local descLabel = Instance.new("TextLabel", exampleProductFrame)
+	descLabel.Name = "DescLabel"
+	descLabel.Font = Enum.Font.RobotoMono
+	descLabel.Text = "Product Description:"
+	descLabel.TextColor3 = colors.textPrimary
+	descLabel.TextSize = 14
+	descLabel.TextXAlignment = Enum.TextXAlignment.Left
+	descLabel.BackgroundTransparency = 1
+	descLabel.Position = UDim2.new(0.048, 0, 0.47, 0)
+	descLabel.Size = UDim2.new(0.8, 0, 0, 21)
+	descLabel.ZIndex = 16
+	table.insert(text1, descLabel)
+	
+	local priceLabel = Instance.new("TextLabel", exampleProductFrame)
+	priceLabel.Name = "PriceLabel"
+	priceLabel.Font = Enum.Font.RobotoMono
+	priceLabel.Text = "Product Price:"
+	priceLabel.TextColor3 = colors.textPrimary
+	priceLabel.TextSize = 14
+	priceLabel.TextXAlignment = Enum.TextXAlignment.Left
+	priceLabel.BackgroundTransparency = 1
+	priceLabel.Position = UDim2.new(0.048, 0, 0.645, 0)
+	priceLabel.Size = UDim2.new(0.5, 0, 0, 21)
+	priceLabel.ZIndex = 16
+	table.insert(text1, priceLabel)
+	
+	local divider = Instance.new("Frame", exampleProductFrame)
+	divider.Name = "Divider"
+	divider.BackgroundColor3 = colors.border
+	divider.BorderSizePixel = 0
+	divider.Position = UDim2.new(0, 0, 1, 0)
+	divider.Size = UDim2.new(1, 0, 0, 2)
+	divider.ZIndex = 16
+	table.insert(shade1, divider)
+	
+	local clickDetector = Instance.new("TextButton", exampleProductFrame)
+	clickDetector.Name = "Click"
+	clickDetector.Text = ""
+	clickDetector.TextTransparency = 1
+	clickDetector.BackgroundTransparency = 1
+	clickDetector.Size = UDim2.new(1, 0, 1, 0)
+	clickDetector.ZIndex = 17
+	
+	local copyScriptButton = Instance.new("TextButton", exampleProductFrame)
+	copyScriptButton.Name = "CopyScriptButton"
+	copyScriptButton.Font = Enum.Font.RobotoMono
+	copyScriptButton.Text = "Copy Script"
+	copyScriptButton.TextColor3 = colors.textPrimary
+	copyScriptButton.TextSize = 12
+	copyScriptButton.BackgroundColor3 = Color3.fromRGB(70, 70, 150)
+	copyScriptButton.Position = UDim2.new(0.65, 0, 0.25, 0)
+	copyScriptButton.Size = UDim2.new(0, 80, 0, 21)
+	copyScriptButton.ZIndex = 17
+	table.insert(shade2, copyScriptButton)
+	table.insert(text1, copyScriptButton)
+	
+	local copyScriptCorner = Instance.new("UICorner")
+	copyScriptCorner.CornerRadius = UDim.new(0, 4)
+	copyScriptCorner.Parent = copyScriptButton
+	
+	local copyButton = Instance.new("TextButton", exampleProductFrame)
+	copyButton.Name = "CopyButton"
+	copyButton.Font = Enum.Font.RobotoMono
+	copyButton.Text = "Copy ID"
+	copyButton.TextColor3 = colors.textPrimary
+	copyButton.TextSize = 12
+	copyButton.BackgroundColor3 = colors.bgTertiary
+	copyButton.Position = UDim2.new(0.65, 0, 0.45, 0)
+	copyButton.Size = UDim2.new(0, 80, 0, 21)
+	copyButton.ZIndex = 17
+	table.insert(shade2, copyButton)
+	table.insert(text1, copyButton)
+	
+	local copyCorner = Instance.new("UICorner")
+	copyCorner.CornerRadius = UDim.new(0, 4)
+	copyCorner.Parent = copyButton
+	
+	local buyButton = Instance.new("TextButton", exampleProductFrame)
+	buyButton.Name = "BuyButton"
+	buyButton.Font = Enum.Font.RobotoMono
+	buyButton.Text = "Buy Product"
+	buyButton.TextColor3 = colors.textPrimary
+	buyButton.TextSize = 12
+	buyButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+	buyButton.Position = UDim2.new(0.65, 0, 0.65, 0)
+	buyButton.Size = UDim2.new(0, 80, 0, 21)
+	buyButton.ZIndex = 17
+	table.insert(shade2, buyButton)
+	table.insert(text1, buyButton)
+	
+	local buyCorner = Instance.new("UICorner")
+	buyCorner.CornerRadius = UDim.new(0, 4)
+	buyCorner.Parent = buyButton
+	
+	--[[ Helper Functions ]]
+	local function createHoverEffect(button, hoverColor)
+		local originalColor = button.BackgroundColor3
+		local tweenInfo = TweenInfo.new(0.15)
+		button.MouseEnter:Connect(function()
+			TweenService:Create(button, tweenInfo, {
+				BackgroundColor3 = hoverColor
+			}):Play()
+		end)
+		button.MouseLeave:Connect(function()
+			TweenService:Create(button, tweenInfo, {
+				BackgroundColor3 = originalColor
+			}):Play()
+		end)
+	end
+	
+	local function generateProductScript(productId)
+		return [[local Players = game:GetService("Players")
+local MarketplaceService = game:GetService("MarketplaceService")
+local LocalPlayer = Players.LocalPlayer
+local product = ]] .. tostring(productId) .. [[
+
+function StartProduct()
+    MarketplaceService:SignalPromptProductPurchaseFinished(LocalPlayer.UserId, product, true)
+end
+
+StartProduct()]]
+	end
+	
+	--[[ Main Logic ]]
+	task.spawn(function()
+		local success, products = pcall(function()
+			return MarketplaceService:GetDeveloperProductsAsync()
+		end)
+		
+		if not success then
+			notify('Product Faker', 'Failed to load developer products')
+			return
+		end
+		
+		local allProductsInfo = products:GetCurrentPage()
+		
+		if #allProductsInfo == 0 then
+			notify('Product Faker', 'No developer products found')
+			return
+		end
+		
+		local buyAllProductsButton = developerProductsFrame:WaitForChild("BuyAllProductsButton", 5)
+		if buyAllProductsButton then
+			createHoverEffect(buyAllProductsButton, Color3.fromRGB(180, 70, 70))
+			buyAllProductsButton.MouseButton1Click:Connect(function()
+				if activeResetThreads[buyAllProductsButton] then
+					task.cancel(activeResetThreads[buyAllProductsButton])
+				end
+				
+				if not buyAllProductsButton:GetAttribute("OriginalText") then
+					buyAllProductsButton:SetAttribute("OriginalText", buyAllProductsButton.Text)
+					buyAllProductsButton:SetAttribute("OriginalColor", buyAllProductsButton.BackgroundColor3)
+				end
+				local originalText = buyAllProductsButton:GetAttribute("OriginalText")
+				local originalColor = buyAllProductsButton:GetAttribute("OriginalColor")
+				buyAllProductsButton.Text = "Processing..."
+				buyAllProductsButton.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
+				
+				for _, productInfo in pairs(allProductsInfo) do
+					Finished(productInfo)
+					task.wait(0.3)
+				end
+				
+				activeResetThreads[buyAllProductsButton] = task.spawn(function()
+					buyAllProductsButton.Text = "Done!"
+					buyAllProductsButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+					task.wait(1.5)
+					buyAllProductsButton.Text = originalText
+					buyAllProductsButton.BackgroundColor3 = originalColor
+					activeResetThreads[buyAllProductsButton] = nil
+				end)
+			end)
+		end
+		
+		for _, productInfo in pairs(allProductsInfo) do
+			local productFrame = exampleProductFrame:Clone()
+			productFrame.Visible = true
+			productFrame.Parent = scrollingFrame
+			productFrame.NameLabel.Text = "Name: " .. productInfo.Name
+			productFrame.IDLabel.Text = "ID: " .. tostring(productInfo.ProductId)
+			productFrame.DescLabel.Text = "Description: " .. productInfo.Description
+			productFrame.PriceLabel.Text = "Price: " .. tostring(productInfo.PriceInRobux)
+			
+			productFrame.Click.MouseButton1Click:Connect(function()
+				Finished(productInfo)
+			end)
+			
+			local productHoverBg = productFrame.HoverBg
+			productFrame.Click.MouseEnter:Connect(function()
+				TweenService:Create(productHoverBg, TweenInfo.new(0.2), {
+					BackgroundTransparency = 0.7
+				}):Play()
+			end)
+			productFrame.Click.MouseLeave:Connect(function()
+				TweenService:Create(productHoverBg, TweenInfo.new(0.2), {
+					BackgroundTransparency = 1
+				}):Play()
+			end)
+			
+			local productCopyScriptButton = productFrame.CopyScriptButton
+			createHoverEffect(productCopyScriptButton, Color3.fromRGB(90, 90, 180))
+			productCopyScriptButton.MouseButton1Click:Connect(function()
+				if setclipboard then
+					if activeResetThreads[productCopyScriptButton] then
+						task.cancel(activeResetThreads[productCopyScriptButton])
+					end
+					if not productCopyScriptButton:GetAttribute("OriginalText") then
+						productCopyScriptButton:SetAttribute("OriginalText", productCopyScriptButton.Text)
+						productCopyScriptButton:SetAttribute("OriginalColor", productCopyScriptButton.BackgroundColor3)
+					end
+					local originalText = productCopyScriptButton:GetAttribute("OriginalText")
+					local originalColor = productCopyScriptButton:GetAttribute("OriginalColor")
+					local scriptCode = generateProductScript(productInfo.ProductId)
+					setclipboard(scriptCode)
+					productCopyScriptButton.Text = "Copied!"
+					productCopyScriptButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+					
+					activeResetThreads[productCopyScriptButton] = task.spawn(function()
+						task.wait(1)
+						productCopyScriptButton.Text = originalText
+						productCopyScriptButton.BackgroundColor3 = originalColor
+						activeResetThreads[productCopyScriptButton] = nil
+					end)
+				else
+					notify('Product Faker', 'Clipboard not available')
+				end
+			end)
+			
+			local productCopyButton = productFrame.CopyButton
+			createHoverEffect(productCopyButton, Color3.fromRGB(90, 90, 90))
+			productCopyButton.MouseButton1Click:Connect(function()
+				if setclipboard then
+					if activeResetThreads[productCopyButton] then
+						task.cancel(activeResetThreads[productCopyButton])
+					end
+					if not productCopyButton:GetAttribute("OriginalText") then
+						productCopyButton:SetAttribute("OriginalText", productCopyButton.Text)
+						productCopyButton:SetAttribute("OriginalColor", productCopyButton.BackgroundColor3)
+					end
+					local originalText = productCopyButton:GetAttribute("OriginalText")
+					local originalColor = productCopyButton:GetAttribute("OriginalColor")
+					setclipboard(tostring(productInfo.ProductId))
+					productCopyButton.Text = "Copied!"
+					productCopyButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+					
+					activeResetThreads[productCopyButton] = task.spawn(function()
+						task.wait(1)
+						productCopyButton.Text = originalText
+						productCopyButton.BackgroundColor3 = originalColor
+						activeResetThreads[productCopyButton] = nil
+					end)
+				else
+					notify('Product Faker', 'Clipboard not available')
+				end
+			end)
+			
+			local productBuyButton = productFrame.BuyButton
+			createHoverEffect(productBuyButton, Color3.fromRGB(180, 70, 70))
+			productBuyButton.MouseButton1Click:Connect(function()
+				if activeResetThreads[productBuyButton] then
+					task.cancel(activeResetThreads[productBuyButton])
+				end
+				if not productBuyButton:GetAttribute("OriginalText") then
+					productBuyButton:SetAttribute("OriginalText", productBuyButton.Text)
+					productBuyButton:SetAttribute("OriginalColor", productBuyButton.BackgroundColor3)
+				end
+				local originalText = productBuyButton:GetAttribute("OriginalText")
+				local originalColor = productBuyButton:GetAttribute("OriginalColor")
+				productBuyButton.Text = "Processing..."
+				productBuyButton.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
+				
+				Finished(productInfo)
+				
+				activeResetThreads[productBuyButton] = task.spawn(function()
+					task.wait(0.5)
+					productBuyButton.Text = "Done!"
+					productBuyButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+					task.wait(1.5)
+					productBuyButton.Text = originalText
+					productBuyButton.BackgroundColor3 = originalColor
+					activeResetThreads[productBuyButton] = nil
+				end)
+			end)
+		end
+	end)
+	
+	--[[ Window Control ]]
+	closeButton.MouseButton1Click:Connect(function()
+		mainGui:Destroy()
+	end)
+	
+	local isDragging = false
+	local dragStart
+	local startPosition
+	local mouseMoveConnection
+	local mouseUpConnection
+	
+	developerProductsFrame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			isDragging = true
+			dragStart = input.Position
+			startPosition = developerProductsFrame.Position
+			mouseMoveConnection = UserInputService.InputChanged:Connect(function(moveInput)
+				if (moveInput.UserInputType == Enum.UserInputType.MouseMovement or moveInput.UserInputType == Enum.UserInputType.Touch) and isDragging then
+					local delta = moveInput.Position - dragStart
+					developerProductsFrame.Position = UDim2.new(startPosition.X.Scale, startPosition.X.Offset + delta.X, startPosition.Y.Scale, startPosition.Y.Offset + delta.Y)
+				end
+			end)
+			mouseUpConnection = UserInputService.InputEnded:Connect(function(endInput)
+				if (endInput.UserInputType == Enum.UserInputType.MouseButton1 or endInput.UserInputType == Enum.UserInputType.Touch) and isDragging then
+					isDragging = false
+					if mouseMoveConnection then
+						mouseMoveConnection:Disconnect()
+					end
+					if mouseUpConnection then
+						mouseUpConnection:Disconnect()
+					end
+				end
+			end)
+		end
+	end)
+	
+	notify('Product Faker', 'GUI opened')
+end)
+
 task.spawn(function()
 	wait()
-	Credits:TweenPosition(UDim2.new(0, 0, 0.9, 0), "Out", "Quart", 0.2)
-	Logo:TweenSizeAndPosition(UDim2.new(0, 175, 0, 175), UDim2.new(0, 37, 0, 45), "Out", "Quart", 0.3)
+	Credits:TweenPosition(UDim2.new(0.5, 0, 0.9, 0), "Out", "Quart", 0.2)
+	-- Make logo cover most of the Holder window (centered)
+	local holderSize = Holder.AbsoluteSize
+	local logoSize = math.min(holderSize.X, holderSize.Y) * 0.8 -- 80% of smallest dimension
+	Logo:TweenSizeAndPosition(
+		UDim2.new(0, logoSize, 0, logoSize), 
+		UDim2.new(0.5, 0, 0.5, 0), 
+		"Out", "Quart", 0.3
+	)
 	wait(1)
 	local OutInfo = TweenInfo.new(1.6809, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 0)
 	TweenService:Create(Logo, OutInfo, {ImageTransparency = 1}):Play()
 	TweenService:Create(IntroBackground, OutInfo, {BackgroundTransparency = 1}):Play()
-	Credits:TweenPosition(UDim2.new(0, 0, 0.9, 30), "Out", "Quart", 0.2)
+	Credits:TweenPosition(UDim2.new(0.5, 0, 0.9, 30), "Out", "Quart", 0.2)
 	wait(0.2)
 	Logo:Destroy()
 	Credits:Destroy()
