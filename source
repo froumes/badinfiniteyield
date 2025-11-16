@@ -824,7 +824,7 @@ Logo.BorderSizePixel = 0
 Logo.Position = UDim2.new(0.5, 0, 0.5, 0)
 Logo.Size = UDim2.new(0, 10, 0, 10)
 Logo.AnchorPoint = Vector2.new(0.5, 0.5)
-Logo.Image = "https://raw.githubusercontent.com/froumes/badinfiniteyield/master/logo.png"
+Logo.Image = getcustomasset("infiniteyield/assets/logo.png")
 Logo.ImageTransparency = 0
 Logo.ZIndex = 101
 
@@ -15074,8 +15074,20 @@ end)
 
 task.spawn(function()
 	wait()
-	-- Use GitHub URL directly for logo
-	Logo.Image = "https://raw.githubusercontent.com/froumes/badinfiniteyield/master/logo.png"
+	-- Wait for logo to download and load from local file
+	local maxRetries = 20
+	for i = 1, maxRetries do
+		if isfile and isfile("infiniteyield/assets/logo.png") and waxgetcustomasset then
+			local success, logoPath = pcall(function()
+				return waxgetcustomasset("infiniteyield/assets/logo.png")
+			end)
+			if success and logoPath and logoPath ~= "" then
+				Logo.Image = logoPath
+				break
+			end
+		end
+		wait(0.1)
+	end
 	Credits:TweenPosition(UDim2.new(0.5, 0, 0.9, 0), "Out", "Quart", 0.2)
 	-- Make logo cover most of the Holder window (centered)
 	local holderSize = Holder.AbsoluteSize
