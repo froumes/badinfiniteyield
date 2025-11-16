@@ -1,0 +1,87 @@
+badinfiniteyield - Complete List of Changes
+
+REBRANDING
+All references to "Infinite Yield" or "IY" changed to "badinfiniteyield" or "BIY" throughout the script including command descriptions, UI text, error messages, chat logs, notifications, Discord references, and title bar.
+
+NEW COMMANDS ADDED
+
+Utility Commands:
+productfaker (alias: pfaker) - Opens GUI to fake developer product purchases
+bsh - Loads BSH LuaArmor loader tool
+umr - Loads Universal Movement Recorder tool
+settings (aliases: set, config) - Opens settings window
+debug on/off - Enables/disables debug mode with console output
+
+Remote Spy Commands:
+oldrspy - Opens Simple Spy V3 (old remote spy)
+remotespy (alias: rspy) - Opens Cobalt Remote Spy (new version)
+
+Developer Commands - Search and Find:
+findguitext (alias: fgt) [text] - Finds GUI elements containing text, excludes own GUI
+findvalue (alias: fv) [value] - Finds instances with matching property values
+findguid (alias: guid) [name] - Finds objects with GUID attributes
+findscript (alias: fs) [name] - Finds scripts by name or source content
+findremotes (alias: fr) - Finds all RemoteEvent and RemoteFunction objects
+findbindables (alias: fb) - Finds all BindableEvent and BindableFunction objects
+findattribute (alias: fa) [name] - Finds instances with specific attribute name
+findmodules (alias: fm) [name] - Finds ModuleScript objects by name or content
+findbyclass (alias: fbc) [class] - Finds all instances of a class in entire game
+findbytag (alias: fbt) [tag] - Finds instances with CollectionService tag
+findvalues (alias: fvs) [type] - Finds Value objects like StringValue, IntValue, etc
+findanimations (alias: fan) - Finds all Animation objects with their IDs
+findtools (alias: ft) - Finds all Tool objects with properties
+findspawns (alias: fsp) - Finds all SpawnLocation objects
+
+Developer Commands - Inspection:
+listinstances (alias: li) [class] - Lists all instances of a class in workspace
+getproperties (alias: gp) [object] - Gets all properties of an object
+getchildren (alias: gc) [path] - Gets direct children of an object
+getdescendants (alias: gd) [path] - Gets all descendants of an object
+gethierarchy (alias: gh) [path] - Gets full hierarchy/path showing parent chain
+getremoteinfo (alias: gri) [name] - Gets detailed info about a specific remote
+
+Developer Commands - Information:
+workspaceinfo (alias: wsi) - Shows workspace summary with object counts and class breakdown
+getalltags (alias: gat) - Lists all CollectionService tags with instance counts
+getservices (alias: gs) - Lists all Roblox services with child counts
+getnetworkowner (alias: gno) [part] - Gets network ownership info for a part
+
+FEATURES AND IMPROVEMENTS
+All developer commands copy results to clipboard automatically
+All commands list ALL results with no truncation limits
+findguitext properly excludes exploit's own GUI elements
+
+BUG FIXES
+Fixed settings command - window now properly appears
+Fixed findGUItext - no longer finds itself (command bar input)
+Added debug output to settings function
+
+DISCORD LINK UPDATE
+Updated Discord invite to: https://discord.gg/Jcw7U2YeC3
+Updated in discord command, plugins hint, and reference GUI
+
+LOGO AND ASSETS
+Changed logo to BSH logo asset ID: 108958277581586
+Modified asset system to prevent logo download from GitHub backup
+
+ANTI-CHEAT PROTECTION
+Replaced all hardcoded asset IDs with random generation including:
+- All image assets (logo, buttons, icons)
+- All animation IDs (dance, spasm, headthrow, bang, carpet, jerk)
+- Color picker GUI asset
+- Dex explorer asset
+
+UI IMPROVEMENTS
+Logo intro animation covers entire script GUI window
+Background covers full window, logo centered at 80% size
+Credits text centered horizontally
+Credits updated to: "Original Team + austin"
+
+TECHNICAL DETAILS
+Asset system modified so logo uses asset ID directly
+Logo and intro background properly parented to Holder window
+All developer commands follow consistent patterns with error handling
+
+Total new commands: 30+
+Total commands modified: 5+
+All changes made to: source file
