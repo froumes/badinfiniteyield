@@ -118,8 +118,19 @@ local iyassets = {
 }
 
 local function getcustomasset(asset)
-    -- Force logo.png to use asset ID, not local file
-    if asset == "infiniteyield/assets/logo.png" then
+    -- Check if file exists locally first (for downloaded assets like logo)
+    if isfile and isfile(asset) and waxgetcustomasset then
+        local success, result = pcall(function()
+            return waxgetcustomasset(asset)
+        end)
+        if success and result ~= nil and result ~= "" then
+            return result
+        end
+    end
+    -- For logo assets, check local file first, then fallback to URL
+    if asset == "infiniteyield/assets/logo.png" or asset == "infiniteyield/assets/imgstudiopluginlogo.png" then
+        -- If local file exists, it should have been handled above
+        -- Otherwise fallback to the URL (though this won't work in Roblox, so local file is required)
         return iyassets[asset]
     end
     if waxgetcustomasset then
@@ -142,8 +153,18 @@ if makefolder and isfolder and writefile and isfile then
             end
         end
         for path in iyassets do
-            -- Skip logo.png - we want to use the asset ID directly, not download from backup
-            if path ~= "infiniteyield/assets/logo.png" then
+            if path == "infiniteyield/assets/logo.png" or path == "infiniteyield/assets/imgstudiopluginlogo.png" then
+                -- Download logo from user's GitHub repo
+                if not isfile(path) then
+                    local logoUrl = "https://raw.githubusercontent.com/froumes/badinfiniteyield/master/logo.png"
+                    local success, logoData = pcall(function()
+                        return game:HttpGet(logoUrl)
+                    end)
+                    if success and logoData then
+                        writefile(path, logoData)
+                    end
+                end
+            else
                 if not isfile(path) then
                     writefile(path, game:HttpGet((path:gsub("infiniteyield/", assets))))
                 end
